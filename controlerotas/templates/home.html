@@ -197,6 +197,11 @@ function limparFiltros() {
     // Redirecionar para a página sem parâmetros de filtro
     window.location.href = "{{ url_for('home') }}";
 }
+
+setInterval(function() {
+    window.location.reload();
+}, 30000);
+
 </script>
 
 {% endblock %}
