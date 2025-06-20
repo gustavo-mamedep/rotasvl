@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0 ms-1">Rota dos Serviços</h1>
+        {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'operador' %}
+        <a href="{{ url_for('criar_servico') }}" class="btn btn-login">
+            + Novo Serviço
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Seção de Filtros -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" id="form-filtros">
+                <div class="row">
+                    <div class="col-md-3">
+                        {{ form_filtros.usuario.label(class="form-label") }}
+                        {{ form_filtros.usuario(class="form-select", id="filtro-usuario") }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_filtros.bairro.label(class="form-label") }}
+                        {{ form_filtros.bairro(class="form-select", id="filtro-bairro") }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_filtros.prestador.label(class="form-label") }}
+                        {{ form_filtros.prestador(class="form-select", id="filtro-prestador") }}
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-limpar me-2" onclick="limparFiltros()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button type="submit" class="btn btn-login">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- 🟦 Coluna 1 - Cadastrado -->
+        <div class="col-md-4">
+            <h3 class="text-center text-primary">Cadastrados</h3>
+            {% if cadastrados %}
+                {% for servico in cadastrados %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                        <a href="{{ url_for('editar_servico', id=servico.id) }}" class="text-decoration-none text-dark">
+                            <h5 class="card-title" style="cursor: pointer;">
+                                <i class="fas fa-edit text-primary me-1"></i>{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}
+                            </h5>
+                        </a>
+                        {% else %}
+                        <h5 class="card-title">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
+                        {% endif %}
+                        <p class="card-text">
+                            <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
+                            <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
+                            <strong>Documento:</strong> {{ servico.documento }}<br>
+                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                        </p>
+                        {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                        <form action="{{ url_for('atualizar_status', id=servico.id, novo_status='Em Rota') }}" method="POST" onsubmit="return confirm('Deseja mover para EM ROTA?')">
+                            <button class="btn btn-warning w-100">Em Rota</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted small">
+                        <i class="fas fa-calendar-plus"></i> Cadastrado em: {{ servico.data_ajustada.strftime('%d/%m/%Y às %H:%M') }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">Nenhum serviço cadastrado.</p>
+            {% endif %}
+        </div>
+
+        <!-- 🟧 Coluna 2 - Em Rota -->
+        <div class="col-md-4">
+            <h3 class="text-center text-warning">Em Rota</h3>
+            {% if em_rota %}
+                {% for servico in em_rota %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title mb-0">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
+                            <div class="d-flex">
+                                <!-- Botões de reordenação - apenas para entregador e admin -->
+                                {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'entregador' %}
+                                <form action="{{ url_for('mover_ordem_rota', id=servico.id, direcao='cima') }}" method="POST" class="d-inline me-1">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary p-1" title="Mover para cima">
+                                        <i class="bi bi-arrow-down-short"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('mover_ordem_rota', id=servico.id, direcao='baixo') }}" method="POST" class="d-inline me-1">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary p-1" title="Mover para baixo">
+                                        <i class="bi bi-arrow-up-short"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <!-- Botão voltar para cadastrado - apenas para admin e operador (próprios serviços) -->
+                                {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                                <form action="{{ url_for('voltar_cadastrado', id=servico.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja voltar para CADASTRADO?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary p-1" title="Voltar para Cadastrado">
+                                        <i class="bi bi-arrow-return-left"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="card-text mt-2">
+                            <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
+                            <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
+                            <strong>Documento:</strong> {{ servico.documento }}<br>
+                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                        </p>
+                        <form action="{{ url_for('atualizar_status', id=servico.id, novo_status='Finalizado') }}" method="POST" onsubmit="return confirm('Deseja FINALIZAR este serviço?')">
+                            <button class="btn btn-success w-100">Finalizar</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        <i class="fas fa-calendar-plus"></i> Cadastrado em: {{ servico.data_ajustada.strftime('%d/%m/%Y às %H:%M') }}<br>
+                        {% if servico.data_em_rota_ajustada %}
+                        <i class="fas fa-route text-warning"></i> Em rota desde: {{ servico.data_em_rota_ajustada.strftime('%d/%m/%Y às %H:%M') }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">Nenhum serviço em rota.</p>
+            {% endif %}
+        </div>
+
+        <!-- 🟩 Coluna 3 - Finalizado -->
+        <div class="col-md-4">
+            <h3 class="text-center text-success">Finalizados</h3>
+            {% if finalizados %}
+                {% for servico in finalizados %}
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
+                        <p class="card-text">
+                            <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
+                            <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
+                            <strong>Documento:</strong> {{ servico.documento }}<br>
+                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted small">
+                        <i class="fas fa-calendar-plus"></i> Cadastrado em: {{ servico.data_ajustada.strftime('%d/%m/%Y às %H:%M') }}<br>
+                        {% if servico.data_em_rota_ajustada %}
+                        <i class="fas fa-route text-warning"></i> Em rota desde: {{ servico.data_em_rota_ajustada.strftime('%d/%m/%Y às %H:%M') }}<br>
+                        {% endif %}
+                        {% if servico.data_finalizado_ajustada %}
+                        <i class="fas fa-check-circle text-success"></i> Finalizado em: {{ servico.data_finalizado_ajustada.strftime('%d/%m/%Y às %H:%M') }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center">Nenhum serviço finalizado.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroUsuario = document.getElementById('filtro-usuario');
+    const filtroBairro = document.getElementById('filtro-bairro');
+    const filtroPrestador = document.getElementById('filtro-prestador');
+    const formFiltros = document.getElementById('form-filtros');
+    
+    // Auto-submit quando qualquer filtro for alterado
+    [filtroUsuario, filtroBairro, filtroPrestador].forEach(function(elemento) {
+        elemento.addEventListener('change', function() {
+            formFiltros.submit();
+        });
+    });
+});
+
+function limparFiltros() {
+    // Redirecionar para a página sem parâmetros de filtro
+    window.location.href = "{{ url_for('home') }}";
+}
+</script>
+
+{% endblock %}
+

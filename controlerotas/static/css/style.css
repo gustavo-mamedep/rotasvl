@@ -1,0 +1,59 @@
+.menu-text {
+    color: #e9b459;
+    font-weight: bold;
+    font-size: 28px
+}
+
+.nav-link.active {
+    background-color: #e9b459 !important;
+    color: black !important;
+}
+
+.nav-link:hover {
+    background-color: #fef1da;
+    color: #004085;
+}
+
+.nav-link {
+    color: black;
+}
+
+.botao_logout {
+    color: #e9b459
+}
+
+.btn-login {
+    background-color: #e9b459;
+    color: black;
+    font-weight: bold;
+    font-size: 17px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-login:hover {
+    background-color: #c7983a;
+    color: white;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+.link {
+    color: black
+}
+
+.btn-limpar {
+    background-color: #cccccc;
+    color: black;
+    font-weight: bold;
+    font-size: 17px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn-limpar:hover {
+    background-color: #7a7a7a;
+    color: white;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+
+.bg-usuario {
+    background-color: #ff4d4d !important;
+    color: white !important;
+}

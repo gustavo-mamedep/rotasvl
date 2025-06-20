@@ -1,0 +1,51 @@
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light vh-100" style="width: 220px;">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="50" height="50" class="me-2">
+        <span class="menu-text ms-3">Menu</span>
+    </a>
+    <hr>
+    <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                <i class="bi bi-truck"></i><span class="ms-3">Lançamentos</span>
+            </a>
+        </li>
+        <li>
+            <a href="/usuarios" class="nav-link {% if request.path == '/usuarios' %}active{% endif %}">
+                <i class="bi bi-people-fill"></i><span class="ms-3">Usuários</span>
+            </a>
+        </li>
+        <li>
+            <a href="/bairros" class="nav-link {% if request.path == '/bairros' %}active{% endif %}">
+                <i class="bi bi-signpost-2"></i><span class="ms-3">Bairros</span>
+            </a>
+        </li>
+        <li>
+            <a href="/suporte" class="nav-link {% if request.path == '/suporte' %}active{% endif %}">
+                <i class="bi bi-question-circle"></i><span class="ms-3">Suporte</span>
+            </a>
+        </li>
+    </ul>
+    <hr>
+    <div class="mb-3">
+        <div class="d-flex align-items-center mb-2">
+            <i class="bi bi-person-circle me-2"></i>
+            <div>
+                <small class="text-muted">Logado como:</small><br>
+                <strong>{{ usuario_logado.usuario if usuario_logado else 'Usuário' }}</strong><br>
+                <span class="badge 
+                    {% if usuario_logado and usuario_logado.tipo == 'admin' %}bg-primary
+                    {% elif usuario_logado and usuario_logado.tipo == 'operador' %}bg-primary
+                    {% elif usuario_logado and usuario_logado.tipo == 'entregador' %}bg-primary
+                    {% else %}bg-secondary{% endif %}">
+                    {{ usuario_logado.tipo.title() if usuario_logado else 'N/A' }}
+                </span>
+            </div>
+        </div>
+    </div>
+    <div>
+        <a href="/logout" class="d-flex align-items-center text-decoration-none botao_logout">
+            <strong>Sair</strong>
+        </a>
+    </div>
+</div>

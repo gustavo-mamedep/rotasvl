@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="ms-5 mt-3">
+    <h1>Criar Usuário</h1>
+</div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="width: 400px;">
+        <div class="mb-3">
+            <h2>Preencha os Dados:</h2>
+        </div>
+
+        <form method="POST">
+            {{ form.csrf_token }}
+
+            <div class="mb-3">
+                {{ form.usuario.label(class="form-label") }}
+                {{ form.usuario(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.senha.label(class="form-label") }}
+                {{ form.senha(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.tipo.label(class="form-label") }}
+                {{ form.tipo(class="form-select") }}
+            </div>
+
+            <div class="d-grid">
+                {{ form.botao_submit_criar(class="btn btn-login") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

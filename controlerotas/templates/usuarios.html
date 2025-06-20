@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+    <div class="container">
+    <!-- Cabeçalho com título e botão -->
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <h1 class="ms-2">Usuários</h1>
+        {% if usuario_logado.tipo == 'admin' %}
+        <a href="/usuarios/criar" class="btn btn-login me-2">+ Criar Usuário</a>
+        {% endif %}
+    </div>
+            <br>
+            {% for usuario in lista_usuarios %}
+    <div class="d-flex justify-content-between align-items-center mt-1 ms-3">
+        <p>{{ usuario.usuario }} - {{ usuario.tipo }}</p>
+
+        {% if usuario_logado.tipo == 'admin' %}
+        <div>
+            <a href="{{ url_for('editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-login">
+                <i class="bi bi-pencil"></i> Editar
+            </a>
+
+            <form action="{{ url_for('excluir_usuario', id=usuario.id) }}" method="POST" style="display: inline-block;">
+                <button type="submit" class="btn btn-sm btn-login" onclick="return confirm('Tem certeza que deseja excluir?')">
+                    <i class="bi bi-trash"></i> Excluir
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <hr>
+{% endfor %}
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="ms-5 mt-3">
+    <h1>{% if editar %}Editar Serviço{% else %}Criar Serviço{% endif %}</h1>
+</div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow p-4" style="width: 800px;">
+        <div class="mb-3">
+            <h2>{% if editar %}Editar os Dados:{% else %}Preencha os Dados:{% endif %}</h2>
+        </div>
+
+        <form method="POST">
+            {{ form.csrf_token }}
+
+            <div class="row">
+                <!-- Coluna Esquerda -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.bairro.label(class="form-label") }}
+                        {{ form.bairro(class="form-select", id="bairro-select") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.servico.label(class="form-label") }}
+                        {{ form.servico(class="form-select") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.documento.label(class="form-label") }}
+                        {{ form.documento(class="form-control") }}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.taxa(class="form-check-input", id="taxa-checkbox") }}
+                        {{ form.taxa.label(class="form-check-label") }}
+                    </div>
+                </div>
+
+                <!-- Coluna Direita -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.prestador.label(class="form-label") }}
+                        {{ form.prestador(class="form-select") }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.valor.label(class="form-label") }}
+                        {{ form.valor(class="form-control", id="valor-input", readonly=true) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.obs.label(class="form-label") }}
+                        {{ form.obs(class="form-control", rows=4) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                {{ form.botao_submit_servico(class="btn btn-login") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bairroSelect = document.getElementById('bairro-select');
+    const taxaCheckbox = document.getElementById('taxa-checkbox');
+    const valorInput = document.getElementById('valor-input');
+    
+    // Função para formatar valor com duas casas decimais
+    function formatarValor(valor) {
+        // Converter para número e depois formatar com 2 casas decimais
+        const numero = parseFloat(valor.replace(',', '.'));
+        if (isNaN(numero)) {
+            return '0,00';
+        }
+        return numero.toFixed(2).replace('.', ',');
+    }
+    
+    // Função para atualizar o valor baseado na taxa
+    function atualizarValor() {
+        const bairroSelecionado = bairroSelect.value;
+        const taxaMarcada = taxaCheckbox.checked;
+        
+        if (taxaMarcada && bairroSelecionado && bairroSelecionado !== '') {
+            // Se taxa marcada e bairro selecionado, buscar valor do bairro
+            fetch(`/api/bairro/valor/${encodeURIComponent(bairroSelecionado)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const valorFormatado = formatarValor(data.valor || '0,00');
+                    valorInput.value = valorFormatado;
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar valor do bairro:', error);
+                    valorInput.value = '0,00';
+                });
+        } else {
+            // Se taxa desmarcada ou nenhum bairro selecionado, valor = 0,00
+            valorInput.value = '0,00';
+        }
+    }
+    
+    // Event listeners
+    taxaCheckbox.addEventListener('change', atualizarValor);
+    bairroSelect.addEventListener('change', function() {
+        // Se taxa já estiver marcada, atualizar valor
+        if (taxaCheckbox.checked) {
+            atualizarValor();
+        }
+    });
+});
+</script>
+
+{% endblock %}
+
