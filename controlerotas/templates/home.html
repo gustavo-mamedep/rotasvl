@@ -100,12 +100,12 @@
                                 {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'entregador' %}
                                 <form action="{{ url_for('mover_ordem_rota', id=servico.id, direcao='cima') }}" method="POST" class="d-inline me-1">
                                     <button type="submit" class="btn btn-sm btn-outline-primary p-1" title="Mover para cima">
-                                        <i class="bi bi-arrow-down-short"></i>
+                                        <i class="bi bi-arrow-up-short"></i>
                                     </button>
                                 </form>
                                 <form action="{{ url_for('mover_ordem_rota', id=servico.id, direcao='baixo') }}" method="POST" class="d-inline me-1">
                                     <button type="submit" class="btn btn-sm btn-outline-primary p-1" title="Mover para baixo">
-                                        <i class="bi bi-arrow-up-short"></i>
+                                        <i class="bi bi-arrow-down-short"></i>
                                     </button>
                                 </form>
                                 {% endif %}
