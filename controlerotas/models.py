@@ -22,6 +22,7 @@ class Servico(database.Model):
     status = database.Column(database.String, nullable=False, default='Cadastrado')
     data_em_rota = database.Column(database.DateTime, nullable=True)
     data_finalizado = database.Column(database.DateTime, nullable=True)
+    data_cancelado = database.Column(database.DateTime, nullable=True)
     ordem_rota = database.Column(database.Integer, nullable=True)
 
     id_usuario = database.Column(database.Integer, database.ForeignKey('usuario.id'), nullable=False)

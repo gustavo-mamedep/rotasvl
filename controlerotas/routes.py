@@ -318,7 +318,7 @@ def criar_servico():
         flash('Serviço cadastrado com sucesso!', 'success')
         return redirect(url_for('home'))
 
-    return render_template('criar_servico.html', form=form, usuario_logado=usuario_logado)
+    return render_template("criar_servico.html", form=form, usuario_logado=usuario_logado)
 
 
 @app.route('/servico/atualizar_status/<int:id>/<string:novo_status>', methods=['POST'])
@@ -430,17 +430,29 @@ def editar_servico(id):
     form.bairro.choices = [('', 'Selecione')] + [(bairro.nome, bairro.nome) for bairro in bairros]
 
     if form.validate_on_submit():
-        servico.bairro = form.bairro.data
-        servico.servico = form.servico.data
-        servico.documento = form.documento.data
-        servico.prestador = form.prestador.data
-        servico.taxa = form.taxa.data
-        servico.valor = float(form.valor.data.replace(',', '.')) if form.valor.data else 0.0
-        servico.obs = form.obs.data if form.obs.data else ''
+        # Verificar se o checkbox de cancelar foi marcado
+        cancelar = request.form.get('cancelar')
+        
+        if cancelar:
+            # Cancelar o serviço
+            servico.status = 'Cancelado'
+            servico.data_cancelado = datetime.utcnow()
+            database.session.commit()
+            flash('Serviço cancelado com sucesso!', 'success')
+            return redirect(url_for('home'))
+        else:
+            # Atualizar o serviço normalmente
+            servico.bairro = form.bairro.data
+            servico.servico = form.servico.data
+            servico.documento = form.documento.data
+            servico.prestador = form.prestador.data
+            servico.taxa = form.taxa.data
+            servico.valor = float(form.valor.data.replace(',', '.')) if form.valor.data else 0.0
+            servico.obs = form.obs.data if form.obs.data else ''
 
-        database.session.commit()
-        flash('Serviço atualizado com sucesso!', 'success')
-        return redirect(url_for('home'))
+            database.session.commit()
+            flash('Serviço atualizado com sucesso!', 'success')
+            return redirect(url_for('home'))
 
     # Preencher o formulário com os dados atuais
     form.bairro.data = servico.bairro
@@ -448,10 +460,10 @@ def editar_servico(id):
     form.documento.data = servico.documento
     form.prestador.data = servico.prestador
     form.taxa.data = servico.taxa
-    form.valor.data = f"{servico.valor:.2f}".replace('.', ',')
+    form.valor.data = f"{servico.valor:.2f}".replace(".", ",")
     form.obs.data = servico.obs
 
-    return render_template('criar_servico.html', form=form, editar=True, usuario_logado=usuario_logado)
+    return render_template("criar_servico.html", form=form, usuario_logado=usuario_logado, servico=servico, editar=True)
 
 
 @app.route('/servico/voltar_cadastrado/<int:id>', methods=['POST'])
@@ -558,5 +570,94 @@ def mover_ordem_rota(id, direcao):
     
     database.session.commit()
     
+    return redirect(url_for('home'))
+
+
+
+# ======================= CANCELADOS ============================
+
+@app.route('/cancelados')
+def cancelados():
+    if 'usuario_logado' not in session:
+        return redirect(url_for('login'))
+
+    # Obter usuário logado
+    usuario_logado = obter_usuario_logado()
+    
+    # Criar formulário de filtros
+    form_filtros = FormFiltros()
+    
+    # Obter filtros da URL
+    filtro_usuario = request.args.get('usuario', '')
+    filtro_bairro = request.args.get('bairro', '')
+    filtro_prestador = request.args.get('prestador', '')
+    
+    # Query base com joinedload para otimizar
+    query_base = Servico.query.options(joinedload(Servico.usuario))
+    
+    # Aplicar filtros se especificados
+    if filtro_usuario:
+        query_base = query_base.join(Usuario).filter(Usuario.usuario == filtro_usuario)
+    if filtro_bairro:
+        query_base = query_base.filter(Servico.bairro == filtro_bairro)
+    if filtro_prestador:
+        query_base = query_base.filter(Servico.prestador == filtro_prestador)
+    
+    # Buscar serviços cancelados
+    cancelados = query_base.filter(Servico.status == 'Cancelado').order_by(Servico.data_cancelado.desc()).all()
+
+    # Ajustar datas
+    for servico in cancelados:
+        servico.data_ajustada = servico.data_criacao - timedelta(hours=3)
+        if servico.data_cancelado:
+            servico.data_cancelado_ajustada = servico.data_cancelado - timedelta(hours=3)
+        else:
+            servico.data_cancelado_ajustada = None
+
+    # Carregar opções para os filtros (apenas usuários, bairros e prestadores que têm serviços cancelados)
+    usuarios_com_cancelados = database.session.query(distinct(Usuario.usuario)).join(Servico).filter(Servico.status == 'Cancelado').order_by(Usuario.usuario).all()
+    bairros_com_cancelados = database.session.query(distinct(Servico.bairro)).filter(Servico.status == 'Cancelado').order_by(Servico.bairro).all()
+    prestadores_com_cancelados = database.session.query(distinct(Servico.prestador)).filter(Servico.status == 'Cancelado').order_by(Servico.prestador).all()
+    
+    # Configurar choices dos filtros
+    form_filtros.usuario.choices = [('', 'Todos os usuários')] + [(u[0], u[0]) for u in usuarios_com_cancelados]
+    form_filtros.bairro.choices = [('', 'Todos os bairros')] + [(b[0], b[0]) for b in bairros_com_cancelados]
+    form_filtros.prestador.choices = [('', 'Todos os prestadores')] + [(p[0], p[0]) for p in prestadores_com_cancelados]
+    
+    # Definir valores atuais dos filtros
+    form_filtros.usuario.data = filtro_usuario
+    form_filtros.bairro.data = filtro_bairro
+    form_filtros.prestador.data = filtro_prestador
+
+    return render_template('cancelados.html',
+                           cancelados=cancelados,
+                           form_filtros=form_filtros,
+                           usuario_logado=usuario_logado)
+
+
+@app.route('/servico/cancelar/<int:id>', methods=['POST'])
+def cancelar_servico(id):
+    if 'usuario_logado' not in session:
+        return redirect(url_for('login'))
+
+    usuario_logado = obter_usuario_logado()
+    servico = Servico.query.get_or_404(id)
+    
+    # Verificar se o serviço está com status "Cadastrado"
+    if servico.status != 'Cadastrado':
+        flash('Só é possível cancelar serviços com status "Cadastrado".', 'danger')
+        return redirect(url_for('home'))
+    
+    # Verificar permissões: admin pode cancelar qualquer, operador só seus próprios
+    if not verificar_permissao_admin() and servico.id_usuario != usuario_logado.id:
+        flash('Acesso negado. Operadores só podem cancelar seus próprios serviços.', 'danger')
+        return redirect(url_for('home'))
+
+    servico.status = 'Cancelado'
+    servico.data_cancelado = datetime.utcnow()
+
+    database.session.commit()
+
+    flash('Serviço cancelado com sucesso.', 'success')
     return redirect(url_for('home'))
 

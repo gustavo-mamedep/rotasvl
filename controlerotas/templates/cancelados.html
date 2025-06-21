@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0 ms-1">Serviços Cancelados</h1>
+    </div>
+
+    <!-- Seção de Filtros -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" id="form-filtros">
+                <div class="row">
+                    <div class="col-md-3">
+                        {{ form_filtros.usuario.label(class="form-label") }}
+                        {{ form_filtros.usuario(class="form-select", id="filtro-usuario") }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_filtros.bairro.label(class="form-label") }}
+                        {{ form_filtros.bairro(class="form-select", id="filtro-bairro") }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form_filtros.prestador.label(class="form-label") }}
+                        {{ form_filtros.prestador(class="form-select", id="filtro-prestador") }}
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-limpar me-2" onclick="limparFiltros()">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button type="submit" class="btn btn-login">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Coluna de Serviços Cancelados -->
+        <div class="col-12">
+            <h3 class="text-center text-danger">Cancelados</h3>
+            {% if cancelados %}
+                <div class="row">
+                    {% for servico in cancelados %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
+                                <p class="card-text">
+                                    <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
+                                    <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
+                                    <strong>Documento:</strong> {{ servico.documento }}<br>
+                                    <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                                    <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                                </p>
+                            </div>
+                            <div class="card-footer text-muted small">
+                                <i class="fas fa-calendar-plus"></i> Cadastrado em: {{ servico.data_ajustada.strftime('%d/%m/%Y às %H:%M') }}<br>
+                                {% if servico.data_cancelado_ajustada %}
+                                <i class="fas fa-times-circle text-danger"></i> Cancelado em: {{ servico.data_cancelado_ajustada.strftime('%d/%m/%Y às %H:%M') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center">Nenhum serviço cancelado.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroUsuario = document.getElementById('filtro-usuario');
+    const filtroBairro = document.getElementById('filtro-bairro');
+    const filtroPrestador = document.getElementById('filtro-prestador');
+    const formFiltros = document.getElementById('form-filtros');
+    
+    // Auto-submit quando qualquer filtro for alterado
+    [filtroUsuario, filtroBairro, filtroPrestador].forEach(function(elemento) {
+        elemento.addEventListener('change', function() {
+            formFiltros.submit();
+        });
+    });
+});
+
+function limparFiltros() {
+    // Redirecionar para a página sem parâmetros de filtro
+    window.location.href = "{{ url_for('cancelados') }}";
+}
+</script>
+
+{% endblock %}
+
