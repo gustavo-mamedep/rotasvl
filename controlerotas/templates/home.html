@@ -197,7 +197,11 @@ function limparFiltros() {
     // Redirecionar para a página sem parâmetros de filtro
     window.location.href = "{{ url_for('home') }}";
 }
+
 </script>
+
+<script src="{{ url_for(\'static\', filename=\'js/refresh_script.js\') }}"></script>
+
 
 {% endblock %}
 
