@@ -55,11 +55,22 @@
                         {{ form.obs.label(class="form-label") }}
                         {{ form.obs(class="form-control", rows=4) }}
                     </div>
+                    
+                    {% if editar %}
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="cancelar-checkbox" name="cancelar">
+                        <label class="form-check-label text-danger" for="cancelar-checkbox">
+                            <strong>Cancelar Serviço</strong>
+                        </label>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="d-grid">
-                {{ form.botao_submit_servico(class="btn btn-login") }}
+                <button type="submit" class="btn btn-login" id="submit-button">
+                    {% if editar %}Atualizar Serviço{% else %}Criar Serviço{% endif %}
+                </button>
             </div>
         </form>
     </div>
@@ -112,6 +123,28 @@ document.addEventListener('DOMContentLoaded', function() {
             atualizarValor();
         }
     });
+    
+    // Controle do checkbox de cancelamento (apenas em modo edição)
+    const cancelarCheckbox = document.getElementById('cancelar-checkbox');
+    const submitButton = document.getElementById('submit-button');
+    
+    if (cancelarCheckbox && submitButton) {
+        cancelarCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                submitButton.textContent = 'Cancelar Serviço';
+                submitButton.className = 'btn btn-danger';
+                // Confirmar ação
+                if (!confirm('Tem certeza que deseja cancelar este serviço? Esta ação não pode ser desfeita.')) {
+                    this.checked = false;
+                    submitButton.textContent = 'Atualizar Serviço';
+                    submitButton.className = 'btn btn-login';
+                }
+            } else {
+                submitButton.textContent = 'Atualizar Serviço';
+                submitButton.className = 'btn btn-login';
+            }
+        });
+    }
 });
 </script>
 

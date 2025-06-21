@@ -10,9 +10,10 @@
         <a href="/bairros/criar" class="btn btn-login me-2">+ Adicionar Bairro</a>
         {% endif %}
     </div>
-            <br>
+    
+    <div class="mt-5" id="bairrosList">
             {% for bairro in lista_bairros %}
-    <div class="d-flex justify-content-between align-items-center mt-1 ms-3">
+    <div class="bairro-item d-flex justify-content-between align-items-center mt-1 ms-3">
         <p>{{ bairro.nome }} - R$ {{ '%.2f'|format(bairro.valor) }}</p>
 
         {% if usuario_logado.tipo == 'admin' %}
@@ -32,6 +33,7 @@
     <hr>
 {% endfor %}
 
+    </div>
     </div>
 
 {% endblock %}
