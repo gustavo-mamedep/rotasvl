@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="mb-0 ms-1">Dashboard - Estatísticas dos Serviços</h1>
+    </div>
+
+    <!-- Cards de Estatísticas Gerais -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_cadastrados }}</h4>
+                            <p class="card-text">Cadastrados</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-file-earmark-plus" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-warning shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_em_rota }}</h4>
+                            <p class="card-text">Em Rota</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-truck" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_finalizados }}</h4>
+                            <p class="card-text">Finalizados Hoje</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card text-white bg-danger shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_cancelados }}</h4>
+                            <p class="card-text">Cancelados</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-x-circle" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Estatísticas por Usuário -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-people-fill"></i> Serviços por Usuário</h5>
+                </div>
+                <div class="card-body">
+                    {% if servicos_por_usuario %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Usuário</th>
+                                    <th class="text-center">Cadastrados</th>
+                                    <th class="text-center">Em Rota</th>
+                                    <th class="text-center">Finalizados Hoje</th>
+                                    <th class="text-center">Cancelados</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario_stat in servicos_por_usuario %}
+                                <tr>
+                                    <td><strong>{{ usuario_stat.usuario }}</strong></td>
+                                    <td class="text-center"><span class="badge bg-primary">{{ usuario_stat.cadastrados }}</span></td>
+                                    <td class="text-center"><span class="badge bg-warning">{{ usuario_stat.em_rota }}</span></td>
+                                    <td class="text-center"><span class="badge bg-success">{{ usuario_stat.finalizados_hoje }}</span></td>
+                                    <td class="text-center"><span class="badge bg-danger">{{ usuario_stat.cancelados }}</span></td>
+                                    <td class="text-center"><strong>{{ usuario_stat.total }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">Nenhum serviço encontrado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Estatísticas por Bairro -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-signpost-2"></i> Serviços por Bairro</h5>
+                </div>
+                <div class="card-body">
+                    {% if servicos_por_bairro %}
+                    <div class="row">
+                        {% for bairro_stat in servicos_por_bairro %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-left-primary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="card-title text-primary">{{ bairro_stat.bairro }}</h6>
+                                            <div class="row text-xs">
+                                                <div class="col">
+                                                    <span class="text-primary">Cadastrados: {{ bairro_stat.cadastrados }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="row text-xs">
+                                                <div class="col">
+                                                    <span class="text-warning">Em Rota: {{ bairro_stat.em_rota }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="row text-xs">
+                                                <div class="col">
+                                                    <span class="text-success">Finalizados Hoje: {{ bairro_stat.finalizados_hoje }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="row text-xs">
+                                                <div class="col">
+                                                    <span class="text-danger">Cancelados: {{ bairro_stat.cancelados }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="align-self-center">
+                                            <div class="text-center">
+                                                <h4 class="text-dark">{{ bairro_stat.total }}</h4>
+                                                <small class="text-muted">Total</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">Nenhum serviço encontrado.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh a cada 30 segundos
+setInterval(function() {
+    window.location.reload();
+}, 30000);
+</script>
+
+{% endblock %}
+

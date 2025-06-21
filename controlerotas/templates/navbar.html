@@ -11,6 +11,11 @@
             </a>
         </li>
         <li>
+            <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
+                <i class="bi bi-graph-up"></i><span class="ms-3">Dashboard</span>
+            </a>
+        </li>
+        <li>
             <a href="/cancelados" class="nav-link {% if request.path == '/cancelados' %}active{% endif %}">
                 <i class="bi bi-x-circle"></i><span class="ms-3">Cancelados</span>
             </a>
