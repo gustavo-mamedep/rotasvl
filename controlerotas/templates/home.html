@@ -198,6 +198,31 @@ function limparFiltros() {
     window.location.href = "{{ url_for('home') }}";
 }
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroUsuario = document.getElementById('filtro-usuario');
+    const filtroBairro = document.getElementById('filtro-bairro');
+    const filtroPrestador = document.getElementById('filtro-prestador');
+    const formFiltros = document.getElementById('form-filtros');
+
+    // Auto-submit quando qualquer filtro for alterado
+    [filtroUsuario, filtroBairro, filtroPrestador].forEach(function(elemento) {
+        elemento.addEventListener('change', function() {
+            formFiltros.submit();
+        });
+    });
+});
+
+function limparFiltros() {
+    // Redirecionar para a página sem parâmetros de filtro
+    window.location.href = "{{ url_for('home') }}";
+}
+
+// 🔄 Atualização automática a cada 30 segundos
+setInterval(() => {
+    window.location.reload();
+}, 30000); // 30000 milissegundos = 30 segundos
+
 </script>
 
 {% endblock %}
