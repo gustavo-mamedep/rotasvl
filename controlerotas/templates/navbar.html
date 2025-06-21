@@ -1,46 +1,58 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 bg-light vh-100" style="width: 220px;">
-    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none">
-    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="50" height="50" class="me-2">
-        <span class="menu-text ms-3">Menu</span>
-    </a>
+<div class="d-flex flex-column flex-shrink-0 p-3 bg-light vh-100 navbar-container" id="navbar" style="width: 220px;">
+    <!-- Botão de toggle -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="/" class="d-flex align-items-center text-decoration-none">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" width="50" height="50" class="me-2">
+            <span class="menu-text ms-3">Menu</span>
+        </a>
+    </div>
+    <div>
+        <button class="btn btn-link p-0 toggle-btn" id="toggleBtn" onclick="toggleNavbar()" style="border: none; background: none; color: #6c757d;">
+            <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+        </button>
+    </div>
+
     <hr>
+    
     <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item">
             <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
-                <i class="bi bi-truck"></i><span class="ms-3">Lançamentos</span>
+                <i class="bi bi-truck"></i><span class="ms-3 menu-text-nav">Lançamentos</span>
             </a>
         </li>
         <li>
             <a href="/dashboard" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">
-                <i class="bi bi-graph-up"></i><span class="ms-3">Dashboard</span>
+                <i class="bi bi-graph-up"></i><span class="ms-3 menu-text-nav">Dashboard</span>
             </a>
         </li>
         <li>
             <a href="/cancelados" class="nav-link {% if request.path == '/cancelados' %}active{% endif %}">
-                <i class="bi bi-x-circle"></i><span class="ms-3">Cancelados</span>
+                <i class="bi bi-x-circle"></i><span class="ms-3 menu-text-nav">Cancelados</span>
             </a>
         </li>
         <li>
             <a href="/usuarios" class="nav-link {% if request.path == '/usuarios' %}active{% endif %}">
-                <i class="bi bi-people-fill"></i><span class="ms-3">Usuários</span>
+                <i class="bi bi-people-fill"></i><span class="ms-3 menu-text-nav">Usuários</span>
             </a>
         </li>
         <li>
             <a href="/bairros" class="nav-link {% if request.path == '/bairros' %}active{% endif %}">
-                <i class="bi bi-signpost-2"></i><span class="ms-3">Bairros</span>
+                <i class="bi bi-signpost-2"></i><span class="ms-3 menu-text-nav">Bairros</span>
             </a>
         </li>
         <li>
             <a href="/suporte" class="nav-link {% if request.path == '/suporte' %}active{% endif %}">
-                <i class="bi bi-question-circle"></i><span class="ms-3">Suporte</span>
+                <i class="bi bi-question-circle"></i><span class="ms-3 menu-text-nav">Suporte</span>
             </a>
         </li>
     </ul>
+    
     <hr>
-    <div class="mb-3">
+    
+    <div class="mb-3 user-info">
         <div class="d-flex align-items-center mb-2">
             <i class="bi bi-person-circle me-2"></i>
-            <div>
+            <div class="user-details">
                 <small class="text-muted">Logado como:</small><br>
                 <strong>{{ usuario_logado.usuario if usuario_logado else 'Usuário' }}</strong><br>
                 <span class="badge 
@@ -53,9 +65,99 @@
             </div>
         </div>
     </div>
+    
     <div>
         <a href="/logout" class="d-flex align-items-center text-decoration-none botao_logout">
-            <strong>Sair</strong>
+            <i class="bi bi-box-arrow-right me-2"></i>
+            <strong class="logout-text">Sair</strong>
         </a>
     </div>
 </div>
+
+<style>
+/* Estilos para funcionalidade de toggle - não interferem nos estilos originais */
+.navbar-container {
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.navbar-container.collapsed {
+    width: 80px !important;
+}
+
+/* Quando recolhido, esconder textos mas manter estilos originais */
+.navbar-container.collapsed .menu-text,
+.navbar-container.collapsed .menu-text-nav,
+.navbar-container.collapsed .user-details,
+.navbar-container.collapsed .logout-text {
+    display: none;
+}
+
+.navbar-container.collapsed .user-info {
+    display: none;
+}
+
+/* Centralizar elementos quando recolhido */
+.navbar-container.collapsed .nav-link {
+    justify-content: center;
+    padding: 0.5rem;
+}
+
+.navbar-container.collapsed .d-flex:first-child {
+    justify-content: center;
+}
+
+.navbar-container.collapsed .d-flex:first-child img {
+    margin-right: 0 !important;
+}
+
+.navbar-container.collapsed .d-flex:last-child {
+    justify-content: center;
+}
+
+/* Estilo do botão toggle */
+.toggle-btn:hover {
+    color: #495057 !important;
+}
+
+.toggle-btn:focus {
+    box-shadow: none !important;
+}
+
+/* Garantir que os ícones tenham largura mínima */
+.nav-link i {
+    min-width: 20px;
+}
+
+/* Classe para textos de navegação (não interfere com .menu-text original) */
+.menu-text-nav {
+    /* Herda os estilos do CSS original se necessário */
+}
+</style>
+
+<script>
+function toggleNavbar() {
+    const navbar = document.getElementById('navbar');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const icon = toggleBtn.querySelector('i');
+    
+    navbar.classList.toggle('collapsed');
+    
+    // Salvar estado no localStorage
+    localStorage.setItem('navbarCollapsed', navbar.classList.contains('collapsed'));
+    
+    // Manter o mesmo ícone (três linhas)
+    icon.className = 'bi bi-list';
+}
+
+// Restaurar estado salvo quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.getElementById('navbar');
+    const savedState = localStorage.getItem('navbarCollapsed');
+    
+    if (savedState === 'true') {
+        navbar.classList.add('collapsed');
+    }
+});
+</script>
+
