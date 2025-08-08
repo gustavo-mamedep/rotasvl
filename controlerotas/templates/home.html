@@ -54,7 +54,8 @@
                 {% for servico in cadastrados %}
                 <div class="card mb-3 shadow-sm">
                     <div class="card-body">
-                        {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                        {% if usuario_logado.tipo in ['admin', 'entregador']
+                            or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
                         <a href="{{ url_for('editar_servico', id=servico.id) }}" class="text-decoration-none text-dark">
                             <h5 class="card-title" style="cursor: pointer;">
                                 <i class="fas fa-edit text-primary me-1"></i>{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}
@@ -71,7 +72,8 @@
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                         </p>
-                        {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                        {% if usuario_logado.tipo in ['admin', 'entregador']
+                            or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
                         <form action="{{ url_for('atualizar_status', id=servico.id, novo_status='Em Rota') }}" method="POST" onsubmit="return confirm('Deseja mover para EM ROTA?')">
                             <button class="btn btn-warning w-100">Em Rota</button>
                         </form>
@@ -111,7 +113,7 @@
                                 </form>
                                 {% endif %}
                                 <!-- Botão voltar para cadastrado - apenas para admin e operador (próprios serviços) -->
-                                {% if usuario_logado.tipo == 'admin' or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                                {% if usuario_logado.tipo in ['admin', 'entregador'] or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
                                 <form action="{{ url_for('voltar_cadastrado', id=servico.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja voltar para CADASTRADO?')">
                                     <button type="submit" class="btn btn-sm btn-outline-secondary p-1" title="Voltar para Cadastrado">
                                         <i class="bi bi-arrow-return-left"></i>

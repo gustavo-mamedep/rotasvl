@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import distinct
 from datetime import timedelta
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 def obter_usuario_logado():
@@ -65,7 +66,8 @@ def home():
     em_rota = query_base.filter(Servico.status == 'Em Rota').order_by(Servico.ordem_rota.asc(), Servico.data_em_rota.desc()).all()
     
     # Para finalizados, filtrar apenas os do dia atual
-    hoje = datetime.now().date()
+    fuso = ZoneInfo("America/Sao_Paulo")
+    hoje = datetime.now(fuso).date()
     finalizados = query_base.filter(
         Servico.status == 'Finalizado',
         database.func.date(Servico.data_finalizado) == hoje
@@ -337,10 +339,6 @@ def atualizar_status(id, novo_status):
     
     # Verificar permissões baseadas no tipo de usuário e status
     if novo_status == 'Em Rota':
-        # Entregador não pode mover para "Em Rota"
-        if verificar_permissao_entregador():
-            flash('Acesso negado. Entregadores não podem mover serviços para "Em Rota".', 'danger')
-            return redirect(url_for('home'))
         
         # Operador só pode mover seus próprios serviços
         if verificar_permissao_operador() and servico.id_usuario != usuario_logado.id:
@@ -484,12 +482,7 @@ def voltar_cadastrado(id):
     if servico.status != 'Em Rota':
         flash('Só é possível voltar serviços que estão "Em Rota".', 'danger')
         return redirect(url_for('home'))
-    
-    # Entregador não pode voltar para cadastrado
-    if verificar_permissao_entregador():
-        flash('Acesso negado. Entregadores não podem voltar serviços para "Cadastrado".', 'danger')
-        return redirect(url_for('home'))
-    
+        
     # Operador só pode voltar seus próprios serviços
     if verificar_permissao_operador() and servico.id_usuario != usuario_logado.id:
         flash('Acesso negado. Operadores só podem voltar seus próprios serviços.', 'danger')
