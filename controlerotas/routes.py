@@ -339,6 +339,10 @@ def atualizar_status(id, novo_status):
     
     # Verificar permissões baseadas no tipo de usuário e status
     if novo_status == 'Em Rota':
+
+        if verificar_permissao_entregador():
+            flash('Acesso negado. Entregadores não podem mover serviços para "Em Rota".', 'danger')
+            return redirect(url_for('home'))
         
         # Operador só pode mover seus próprios serviços
         if verificar_permissao_operador() and servico.id_usuario != usuario_logado.id:
@@ -482,7 +486,7 @@ def voltar_cadastrado(id):
     if servico.status != 'Em Rota':
         flash('Só é possível voltar serviços que estão "Em Rota".', 'danger')
         return redirect(url_for('home'))
-        
+
     # Operador só pode voltar seus próprios serviços
     if verificar_permissao_operador() and servico.id_usuario != usuario_logado.id:
         flash('Acesso negado. Operadores só podem voltar seus próprios serviços.', 'danger')
