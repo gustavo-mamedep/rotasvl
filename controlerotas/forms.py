@@ -25,6 +25,8 @@ class FormCriarServico(FlaskForm):
         ('Troca', 'Troca'),
         ('Recebimento', 'Recebimento'),
         ('Transferencia', 'Transferência'),
+        ('Mercado Livre', 'Mercado Livre'),
+        ('Correios', 'Correios'),
         ('Outros', 'Outros')
     ], validators=[DataRequired()])
     documento = StringField('Documento', validators=[DataRequired()])

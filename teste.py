@@ -1,22 +1,35 @@
-from sqlalchemy import create_engine
-import pandas as pd
+import os
 
-# Dados de conexão
-DATABASE_URL = 'postgresql://neondb_owner:npg_QjBrhdaqP3i4@ep-long-dust-acp3v069-pooler.sa-east-1.aws.neon.tech:5432/neondb?sslmode=require'
+# ✅ Defina a variável de ambiente ANTES de importar controlerotas
+os.environ['DATABASE_URL'] = "postgresql://u2rr324om9dgp9:pb11deab3e8d1590ea00eb2f784aca63a2ed6c1e861d22d08a7605caa10a5d58b@cer3tutrbi7n1t.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dg59kb9ng2lpi"
 
-# Lendo o CSV
-df = pd.read_csv('bairros.csv', sep=';')
+import csv
+from controlerotas import app, database
+from controlerotas.models import Bairros
 
-# Verificando as colunas
-print('Colunas do CSV:', df.columns.tolist())
+# 📍 Caminho do CSV
+CAMINHO_CSV = 'bairro.csv'
 
-# Convertendo coluna 'valor' para float (remover R$ e trocar vírgula por ponto, se necessário)
-df['valor'] = df['valor'].astype(str).str.replace('R$', '', regex=False).str.replace(',', '.', regex=False).astype(float)
+with app.app_context():
+    # (Opcional) Limpa a tabela antes de importar
+    database.session.query(Bairros).delete()
+    database.session.commit()
 
-# Conectando ao banco
-engine = create_engine(DATABASE_URL)
+    with open(CAMINHO_CSV, mode='r', encoding='latin1') as arquivo:
+        leitor = csv.reader(arquivo, delimiter=';')
+        next(leitor)  # pula o cabeçalho
 
-# Inserindo na tabela 'bairros'
-df.to_sql('bairros', engine, if_exists='append', index=False)
+        for linha in leitor:
+            nome, valor = linha
+            nome = nome.strip()
+            valor = valor.strip().replace('R$', '').replace(',', '.')
 
-print('Dados inseridos com sucesso!')
+            try:
+                valor_float = float(valor)
+                bairro = Bairros(nome=nome, valor=valor_float)
+                database.session.add(bairro)
+            except ValueError:
+                print(f"❌ Erro ao converter o valor do bairro '{nome}': '{valor}'")
+
+        database.session.commit()
+        print("✅ Bairros importados com sucesso!")
