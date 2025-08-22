@@ -35,7 +35,8 @@ class FormCriarServico(FlaskForm):
         ('Uber', 'Uber'),
         ('Outros', 'Outros')
     ], validators=[DataRequired()])
-    taxa = BooleanField('Com Taxa')
+    taxa = BooleanField('Com Taxa ?')
+    cartao = BooleanField('Maquina Cartão ?')
     valor = StringField('Valor', default='0,00')
     obs = TextAreaField('Observação')
     botao_submit_servico = SubmitField('Criar Serviço')

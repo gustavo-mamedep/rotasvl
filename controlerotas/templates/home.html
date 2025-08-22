@@ -71,6 +71,9 @@
                             <strong>Prestador:</strong> {{ servico.prestador }}<br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                            {% if servico.cartao %}
+                                <span class="badge bg-danger mt-3"> LEVAR MAQUINA CARTÃO</span>
+                            {% endif %}
                         </p>
                         {% if usuario_logado.tipo in ['admin', 'entregador']
                             or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
@@ -129,6 +132,9 @@
                             <strong>Prestador:</strong> {{ servico.prestador }}<br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
+                            {% if servico.cartao %}
+                                <span class="badge bg-danger mt-3"> LEVAR MAQUINA CARTÃO</span>
+                            {% endif %}
                         </p>
                         <form action="{{ url_for('atualizar_status', id=servico.id, novo_status='Finalizado') }}" method="POST" onsubmit="return confirm('Deseja FINALIZAR este serviço?')">
                             <button class="btn btn-success w-100">Finalizar</button>

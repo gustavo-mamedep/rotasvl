@@ -16,6 +16,7 @@ class Servico(database.Model):
     documento = database.Column(database.String, nullable=False)
     prestador = database.Column(database.String, nullable=False)
     taxa = database.Column(database.Boolean, nullable=False)
+    cartao = database.Column(database.Boolean, nullable=False)
     valor = database.Column(database.Float, nullable=False)
     obs = database.Column(database.Text, nullable=False)
     data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.utcnow)

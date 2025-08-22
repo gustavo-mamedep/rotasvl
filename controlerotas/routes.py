@@ -317,6 +317,7 @@ def criar_servico():
             documento=form.documento.data,
             prestador=form.prestador.data,
             taxa=form.taxa.data,
+            cartao=form.cartao.data,
             valor=valor,
             obs=form.obs.data if form.obs.data else '',
             id_usuario=session['usuario_logado']  # Usando diretamente o id do usuário logado
@@ -455,6 +456,7 @@ def editar_servico(id):
             servico.documento = form.documento.data
             servico.prestador = form.prestador.data
             servico.taxa = form.taxa.data
+            servico.cartao = form.cartao.data
             servico.valor = float(form.valor.data.replace(',', '.')) if form.valor.data else 0.0
             servico.obs = form.obs.data if form.obs.data else ''
 
@@ -468,6 +470,7 @@ def editar_servico(id):
     form.documento.data = servico.documento
     form.prestador.data = servico.prestador
     form.taxa.data = servico.taxa
+    form.cartao.data = servico.cartao
     form.valor.data = f"{servico.valor:.2f}".replace(".", ",")
     form.obs.data = servico.obs
 
