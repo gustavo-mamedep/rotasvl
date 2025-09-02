@@ -64,13 +64,16 @@ def home():
     # Buscar serviços por status com ordenação específica
     cadastrados = query_base.filter(Servico.status == 'Cadastrado').order_by(Servico.data_criacao.desc()).all()
     em_rota = query_base.filter(Servico.status == 'Em Rota').order_by(Servico.ordem_rota.asc(), Servico.data_em_rota.desc()).all()
-    
-    # Para finalizados, filtrar apenas os do dia atual
+
     fuso = ZoneInfo("America/Sao_Paulo")
-    hoje = datetime.now(fuso).date()
+    agora = datetime.now(fuso)
+    inicio_dia = datetime.combine(agora.date(), datetime.min.time(), tzinfo=fuso)
+    fim_dia = datetime.combine(agora.date(), datetime.max.time(), tzinfo=fuso)
+
     finalizados = query_base.filter(
         Servico.status == 'Finalizado',
-        database.func.date(Servico.data_finalizado) == hoje
+        Servico.data_finalizado >= inicio_dia.astimezone(ZoneInfo("UTC")),
+        Servico.data_finalizado <= fim_dia.astimezone(ZoneInfo("UTC"))
     ).order_by(Servico.data_finalizado.desc()).all()
 
     # Ajustar datas

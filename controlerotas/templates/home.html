@@ -68,7 +68,15 @@
                             <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
                             <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
                             <strong>Documento:</strong> {{ servico.documento }}<br>
-                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Prestador:</strong>
+                                {% if servico.prestador == "Motoqueiro" %}
+                                    <span class="badge bg-success text-light">{{ servico.prestador }}</span>
+                                {% elif servico.prestador == "Uber" %}
+                                    <span class="badge bg-danger text-light">{{ servico.prestador }}</span>
+                                {% else %}
+                                    {{ servico.prestador }}
+                                {% endif %}
+                                <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                             {% if servico.cartao %}
@@ -129,7 +137,15 @@
                             <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
                             <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
                             <strong>Documento:</strong> {{ servico.documento }}<br>
-                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Prestador:</strong>
+                                {% if servico.prestador == "Motoqueiro" %}
+                                    <span class="badge bg-success text-light">{{ servico.prestador }}</span>
+                                {% elif servico.prestador == "Uber" %}
+                                    <span class="badge bg-danger text-light">{{ servico.prestador }}</span>
+                                {% else %}
+                                    {{ servico.prestador }}
+                                {% endif %}
+                                <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                             {% if servico.cartao %}
@@ -165,7 +181,15 @@
                             <strong style="font-size: 20px">Serviço: {{ servico.servico }}</strong><br>
                             <strong>Data:</strong> {{ servico.data_ajustada.strftime('%d/%m/%Y %H:%M') }}<br>
                             <strong>Documento:</strong> {{ servico.documento }}<br>
-                            <strong>Prestador:</strong> {{ servico.prestador }}<br>
+                            <strong>Prestador:</strong>
+                                {% if servico.prestador == "Motoqueiro" %}
+                                    <span class="badge bg-success text-light">{{ servico.prestador }}</span>
+                                {% elif servico.prestador == "Uber" %}
+                                    <span class="badge bg-danger text-light">{{ servico.prestador }}</span>
+                                {% else %}
+                                    {{ servico.prestador }}
+                                {% endif %}
+                                <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                         </p>
