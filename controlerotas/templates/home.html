@@ -4,7 +4,7 @@
 <div class="container-fluid mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0 ms-1">Rota dos Serviços teste</h1>
+        <h1 class="mb-0 ms-1">Rota dos Serviços</h1>
         {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'operador' %}
         <a href="{{ url_for('criar_servico') }}" class="btn btn-login">
             + Novo Serviço
