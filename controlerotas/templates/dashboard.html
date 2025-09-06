@@ -4,7 +4,7 @@
 <div class="container-fluid mt-4">
 
   <div class="d-flex justify-content-between align-items-center mb-2">
-    <h1 class="mb-0 ms-1">Dashboard - Estatísticas dos Serviços</h1>
+    <h1 class="mb-0 ms-1">Dashboard - Números de Serviços</h1>
   </div>
 
   <!-- Filtros de Período -->
@@ -35,11 +35,12 @@
       <button type="submit" class="btn btn-primary">Aplicar</button>
     </div>
   </form>
-
+  <hr>
+  <h4 class="mb-3">Resumo:</h4>
   <!-- Cards de Estatísticas Gerais -->
   <div class="row mb-4">
     <div class="col-md-3">
-      <div class="card text-white bg-primary shadow-sm">
+      <div class="card text-white bg-primary shadow-sm mb-2">
         <div class="card-body">
           <div class="d-flex justify-content-between">
             <div>
@@ -102,6 +103,70 @@
       </div>
     </div>
   </div>
+
+    <hr>
+    <h4 class="mb-4">Por serviço já finalizado:</h4>
+    <div class="row mb-4 justify-content-center">
+      <div class="col-auto mb-3">
+        <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_vendas }}</h4>
+            <p class="card-text">Vendas</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-warning shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_condicional }}</h4>
+            <p class="card-text">Condicional</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-danger shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_buscarcond }}</h4>
+            <p class="card-text">Buscar Cond.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-secondary shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_troca }}</h4>
+            <p class="card-text">Trocas</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_recebimento }}</h4>
+            <p class="card-text">Recebimento</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-primary shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_transferencia }}</h4>
+            <p class="card-text">Transferência</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="card text-white bg-dark shadow-sm mx-auto" style="width: 150px;">
+          <div class="card-body text-center">
+            <h4 class="card-title">{{ total_outros }}</h4>
+            <p class="card-text">Outros</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
 
   <!-- Estatísticas por Usuário -->
   <div class="row mt-4">

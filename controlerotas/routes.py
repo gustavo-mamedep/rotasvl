@@ -3,7 +3,7 @@ from controlerotas import database, app
 from controlerotas.models import Usuario, Bairros, Servico
 from controlerotas.forms import FormCriarUsuario, FormBairros, FormCriarServico, FormFiltros
 from sqlalchemy.orm import joinedload
-from sqlalchemy import distinct
+from sqlalchemy import distinct, or_
 from datetime import timedelta
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -750,6 +750,61 @@ def dashboard():
         Servico.data_cancelado <  fim_utc
     ).count()
 
+    total_vendas = Servico.query.filter(
+        Servico.servico == 'Venda',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_condicional = Servico.query.filter(
+        Servico.servico == 'Condicional',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_buscarcond = Servico.query.filter(
+        Servico.servico == 'Buscar_cond',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_troca = Servico.query.filter(
+        Servico.servico == 'Troca',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_recebimento = Servico.query.filter(
+        Servico.servico == 'Recebimento',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_transferencia = Servico.query.filter(
+        Servico.servico == 'Transferencia',
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+    total_outros = Servico.query.filter(
+        or_(
+            Servico.servico == 'Mercado Livre',
+            Servico.servico == 'Correios',
+            Servico.servico == 'Outros'
+        ),
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado < fim_utc
+    ).count()
+
+
+
     # ===== Estatísticas por Bairro =====
     bairros_com_servicos = database.session.query(distinct(Servico.bairro)).filter(
         Servico.bairro.isnot(None)
@@ -867,6 +922,13 @@ def dashboard():
         total_em_rota=total_em_rota,
         total_finalizados=total_finalizados,
         total_cancelados=total_cancelados,
+        total_vendas=total_vendas,
+        total_condicional=total_condicional,
+        total_buscarcond=total_buscarcond,
+        total_troca=total_troca,
+        total_recebimento=total_recebimento,
+        total_transferencia=total_transferencia,
+        total_outros=total_outros,
         servicos_por_bairro=servicos_por_bairro,
         servicos_por_usuario=servicos_por_usuario,
         label_finalizados=label_finalizados,
