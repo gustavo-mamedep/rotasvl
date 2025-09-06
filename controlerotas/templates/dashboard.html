@@ -34,6 +34,18 @@
     <div class="col-auto" {{ '' if periodo == 'mes' else 'style=display:none;' }}>
       <button type="submit" class="btn btn-primary">Aplicar</button>
     </div>
+
+    <div class="col-auto ms-auto">
+      <label class="form-label mb-0">Usuário</label>
+      <select class="form-select" name="usuario_id" onchange="this.form.submit()">
+        <option value="">Todos</option>
+        {% for uid, uname in usuarios_opts %}
+          <option value="{{ uid }}" {{ 'selected' if usuario_id == uid else '' }}>
+            {{ uname }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
   </form>
   <hr>
   <h4 class="mb-3">Resumo:</h4>
@@ -104,114 +116,68 @@
     </div>
   </div>
 
-    <hr>
-    <h4 class="mb-4">Por serviço já finalizado:</h4>
-    <div class="row mb-4 justify-content-center">
-      <div class="col-auto mb-3">
-        <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_vendas }}</h4>
-            <p class="card-text">Vendas</p>
-          </div>
+  <hr>
+  <h4 class="mb-4">Por serviço já finalizado:</h4>
+  <div class="row mb-4 justify-content-center">
+    <div class="col-auto mb-3">
+      <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_vendas }}</h4>
+          <p class="card-text">Vendas</p>
         </div>
       </div>
-      <div class="col-auto">
-        <div class="card text-white bg-warning shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_condicional }}</h4>
-            <p class="card-text">Condicional</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="card text-white bg-danger shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_buscarcond }}</h4>
-            <p class="card-text">Buscar Cond.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="card text-white bg-secondary shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_troca }}</h4>
-            <p class="card-text">Trocas</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_recebimento }}</h4>
-            <p class="card-text">Recebimento</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="card text-white bg-primary shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_transferencia }}</h4>
-            <p class="card-text">Transferência</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-auto">
-        <div class="card text-white bg-dark shadow-sm mx-auto" style="width: 150px;">
-          <div class="card-body text-center">
-            <h4 class="card-title">{{ total_outros }}</h4>
-            <p class="card-text">Outros</p>
-          </div>
-        </div>
-      </div>
-
     </div>
-
-
-
-  <!-- Estatísticas por Usuário -->
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <h5 class="mb-0"><i class="bi bi-people-fill"></i> Serviços por Usuário</h5>
+    <div class="col-auto">
+      <div class="card text-white bg-warning shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_condicional }}</h4>
+          <p class="card-text">Condicional</p>
         </div>
-        <div class="card-body">
-          {% if servicos_por_usuario %}
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Usuário</th>
-                  <th class="text-center">Cadastrados</th>
-                  <th class="text-center">Em Rota</th>
-                  <th class="text-center">{{ label_finalizados }}</th>
-                  <th class="text-center">{{ label_cancelados }}</th>
-                  <th class="text-center">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for usuario_stat in servicos_por_usuario %}
-                <tr>
-                  <td><strong>{{ usuario_stat.usuario }}</strong></td>
-                  <td class="text-center"><span class="badge bg-primary">{{ usuario_stat.cadastrados }}</span></td>
-                  <td class="text-center"><span class="badge bg-warning">{{ usuario_stat.em_rota }}</span></td>
-                  <td class="text-center"><span class="badge bg-success">{{ usuario_stat.finalizados_hoje }}</span></td>
-                  <td class="text-center"><span class="badge bg-danger">{{ usuario_stat.cancelados }}</span></td>
-                  <td class="text-center"><strong>{{ usuario_stat.total }}</strong></td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% else %}
-          <p class="text-center text-muted">Nenhum serviço encontrado.</p>
-          {% endif %}
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card text-white bg-danger shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_buscarcond }}</h4>
+          <p class="card-text">Buscar Cond.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card text-white bg-secondary shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_troca }}</h4>
+          <p class="card-text">Trocas</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card text-white bg-success shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_recebimento }}</h4>
+          <p class="card-text">Recebimento</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card text-white bg-primary shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_transferencia }}</h4>
+          <p class="card-text">Transferência</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div class="card text-white bg-dark shadow-sm mx-auto" style="width: 150px;">
+        <div class="card-body text-center">
+          <h4 class="card-title">{{ total_outros }}</h4>
+          <p class="card-text">Outros</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Estatísticas por Bairro -->
+  <!-- Estatísticas por Bairro (AGORA CONDICIONAIS POR TIPO) -->
   <div class="row mt-4">
     <div class="col-12">
       <div class="card shadow-sm">
@@ -223,37 +189,41 @@
           <div class="row">
             {% for bairro_stat in servicos_por_bairro %}
             <div class="col-md-4 mb-3">
-              <div class="card border-left-primary">
+              <div class="card">
                 <div class="card-body">
                   <div class="d-flex justify-content-between">
                     <div>
-                      <h6 class="card-title text-primary">{{ bairro_stat.bairro }}</h6>
-                      <div class="row text-xs">
-                        <div class="col">
-                          <span class="text-primary">Cadastrados: {{ bairro_stat.cadastrados }}</span>
-                        </div>
-                      </div>
-                      <div class="row text-xs">
-                        <div class="col">
-                          <span class="text-warning">Em Rota: {{ bairro_stat.em_rota }}</span>
-                        </div>
-                      </div>
-                      <div class="row text-xs">
-                        <div class="col">
-                          <span class="text-success">{{ label_finalizados }}: {{ bairro_stat.finalizados_hoje }}</span>
-                        </div>
-                      </div>
-                      <div class="row text-xs">
-                        <div class="col">
-                          <span class="text-danger">{{ label_cancelados }}: {{ bairro_stat.cancelados }}</span>
-                        </div>
+                      <h6 class="card-title text-primary mb-3">{{ bairro_stat.bairro }}</h6>
+
+                      <!-- Totais por tipo de serviço (mostra só se > 0) -->
+                      <div class="d-flex flex-wrap gap-2">
+                        {% if bairro_stat.vendas > 0 %}
+                          <span class="badge bg-success">Vendas: {{ bairro_stat.vendas }}</span>
+                        {% endif %}
+                        {% if bairro_stat.condicional > 0 %}
+                          <span class="badge bg-warning text-dark">Condicional: {{ bairro_stat.condicional }}</span>
+                        {% endif %}
+                        {% if bairro_stat.buscarcond > 0 %}
+                          <span class="badge bg-danger">Buscar Cond.: {{ bairro_stat.buscarcond }}</span>
+                        {% endif %}
+                        {% if bairro_stat.trocas > 0 %}
+                          <span class="badge bg-secondary">Trocas: {{ bairro_stat.trocas }}</span>
+                        {% endif %}
+                        {% if bairro_stat.recebimento > 0 %}
+                          <span class="badge bg-success">Recebimento: {{ bairro_stat.recebimento }}</span>
+                        {% endif %}
+                        {% if bairro_stat.transferencia > 0 %}
+                          <span class="badge bg-primary">Transferência: {{ bairro_stat.transferencia }}</span>
+                        {% endif %}
+                        {% if bairro_stat.outros > 0 %}
+                          <span class="badge bg-dark">Outros: {{ bairro_stat.outros }}</span>
+                        {% endif %}
                       </div>
                     </div>
-                    <div class="align-self-center">
-                      <div class="text-center">
-                        <h4 class="text-dark">{{ bairro_stat.total }}</h4>
-                        <small class="text-muted">Total</small>
-                      </div>
+
+                    <div class="align-self-center text-center ms-3">
+                      <h4 class="text-dark mb-0">{{ bairro_stat.total }}</h4>
+                      <small class="text-muted">Total</small>
                     </div>
                   </div>
                 </div>
