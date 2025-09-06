@@ -673,103 +673,206 @@ def cancelar_servico(id):
 
 
 # ======================= DASHBOARD ============================
-
 @app.route('/dashboard')
 def dashboard():
     if 'usuario_logado' not in session:
         return redirect(url_for('login'))
-    
+
     usuario_logado = obter_usuario_logado()
-    
-    # Data de hoje para filtrar finalizados
-    hoje = datetime.now().date()
-    
-    # Estatísticas gerais
-    total_cadastrados = Servico.query.filter_by(status='Cadastrado').count()
-    total_em_rota = Servico.query.filter_by(status='Em Rota').count()
+
+    # ===== Parâmetros de filtro =====
+    periodo = request.args.get('periodo', 'dia')   # 'dia' (padrão) ou 'mes'
+    try:
+        mes = int(request.args.get('mes', 0))
+    except:
+        mes = 0
+    try:
+        ano = int(request.args.get('ano', 0))
+    except:
+        ano = 0
+
+    # ===== Janela de tempo (local -> UTC) =====
+    from zoneinfo import ZoneInfo
+    fuso = ZoneInfo("America/Sao_Paulo")
+    agora_local = datetime.now(fuso)
+
+    if periodo == 'mes':
+        if mes < 1 or mes > 12:
+            mes = agora_local.month
+        if ano < 1:
+            ano = agora_local.year
+
+        inicio_local = datetime(ano, mes, 1, 0, 0, 0, tzinfo=fuso)
+        if mes == 12:
+            inicio_prox_mes_local = datetime(ano + 1, 1, 1, 0, 0, 0, tzinfo=fuso)
+        else:
+            inicio_prox_mes_local = datetime(ano, mes + 1, 1, 0, 0, 0, tzinfo=fuso)
+
+        label_finalizados = "Finalizados no Mês"
+        label_cancelados  = "Cancelados no Mês"
+
+    else:  # período = 'dia'
+        inicio_local = datetime(agora_local.year, agora_local.month, agora_local.day, 0, 0, 0, tzinfo=fuso)
+        inicio_prox_mes_local = inicio_local + timedelta(days=1)
+
+        label_finalizados = "Finalizados Hoje"
+        label_cancelados  = "Cancelados Hoje"
+
+    tz_utc = ZoneInfo("UTC")
+    inicio_utc = inicio_local.astimezone(tz_utc)
+    fim_utc    = inicio_prox_mes_local.astimezone(tz_utc)
+
+    # ===== Contagens gerais =====
+    total_cadastrados = Servico.query.filter(
+        Servico.status == 'Cadastrado',
+        Servico.data_criacao >= inicio_utc,
+        Servico.data_criacao <  fim_utc
+    ).count()
+
+    total_em_rota = Servico.query.filter(
+        Servico.status == 'Em Rota',
+        Servico.data_em_rota.isnot(None),
+        Servico.data_em_rota >= inicio_utc,
+        Servico.data_em_rota <  fim_utc
+    ).count()
+
     total_finalizados = Servico.query.filter(
         Servico.status == 'Finalizado',
-        database.func.date(Servico.data_finalizado) == hoje
+        Servico.data_finalizado.isnot(None),
+        Servico.data_finalizado >= inicio_utc,
+        Servico.data_finalizado <  fim_utc
     ).count()
-    total_cancelados = Servico.query.filter(Servico.data_cancelado.isnot(None)).count()
-    
-    # Estatísticas por bairro
+
+    total_cancelados = Servico.query.filter(
+        Servico.status == 'Cancelado',
+        Servico.data_cancelado.isnot(None),
+        Servico.data_cancelado >= inicio_utc,
+        Servico.data_cancelado <  fim_utc
+    ).count()
+
+    # ===== Estatísticas por Bairro =====
     bairros_com_servicos = database.session.query(distinct(Servico.bairro)).filter(
         Servico.bairro.isnot(None)
     ).order_by(Servico.bairro).all()
-    
+
     servicos_por_bairro = []
-    for bairro_tuple in bairros_com_servicos:
-        bairro = bairro_tuple[0]
-        
-        cadastrados = Servico.query.filter_by(bairro=bairro, status='Cadastrado').count()
-        em_rota = Servico.query.filter_by(bairro=bairro, status='Em Rota').count()
-        finalizados_hoje = Servico.query.filter(
+    for (bairro,) in bairros_com_servicos:
+        cadastrados = Servico.query.filter(
+            Servico.bairro == bairro,
+            Servico.status == 'Cadastrado',
+            Servico.data_criacao >= inicio_utc,
+            Servico.data_criacao <  fim_utc
+        ).count()
+
+        em_rota = Servico.query.filter(
+            Servico.bairro == bairro,
+            Servico.status == 'Em Rota',
+            Servico.data_em_rota.isnot(None),
+            Servico.data_em_rota >= inicio_utc,
+            Servico.data_em_rota <  fim_utc
+        ).count()
+
+        finalizados_periodo = Servico.query.filter(
             Servico.bairro == bairro,
             Servico.status == 'Finalizado',
-            database.func.date(Servico.data_finalizado) == hoje
+            Servico.data_finalizado.isnot(None),
+            Servico.data_finalizado >= inicio_utc,
+            Servico.data_finalizado <  fim_utc
         ).count()
+
         cancelados = Servico.query.filter(
             Servico.bairro == bairro,
-            Servico.data_cancelado.isnot(None)
+            Servico.status == 'Cancelado',
+            Servico.data_cancelado.isnot(None),
+            Servico.data_cancelado >= inicio_utc,
+            Servico.data_cancelado <  fim_utc
         ).count()
-        
-        total = cadastrados + em_rota + finalizados_hoje + cancelados
-        
-        if total > 0:  # Só incluir bairros que têm serviços
+
+        total = cadastrados + em_rota + finalizados_periodo + cancelados
+        if total > 0:
             servicos_por_bairro.append({
                 'bairro': bairro,
                 'cadastrados': cadastrados,
                 'em_rota': em_rota,
-                'finalizados_hoje': finalizados_hoje,
+                'finalizados_hoje': finalizados_periodo,
                 'cancelados': cancelados,
                 'total': total
             })
-    
-    # Ordenar por total de serviços (decrescente)
-    servicos_por_bairro.sort(key=lambda x: x['total'], reverse=True)
-    
-    # Estatísticas por usuário
-    usuarios_com_servicos = database.session.query(distinct(Usuario.usuario)).join(Servico).order_by(Usuario.usuario).all()
-    
-    servicos_por_usuario = []
-    for usuario_tuple in usuarios_com_servicos:
-        usuario_nome = usuario_tuple[0]
-        usuario_obj = Usuario.query.filter_by(usuario=usuario_nome).first()
-        
-        if usuario_obj:
-            cadastrados = Servico.query.filter_by(id_usuario=usuario_obj.id, status='Cadastrado').count()
-            em_rota = Servico.query.filter_by(id_usuario=usuario_obj.id, status='Em Rota').count()
-            finalizados_hoje = Servico.query.filter(
-                Servico.id_usuario == usuario_obj.id,
-                Servico.status == 'Finalizado',
-                database.func.date(Servico.data_finalizado) == hoje
-            ).count()
-            cancelados = Servico.query.filter(
-                Servico.id_usuario == usuario_obj.id,
-                Servico.data_cancelado.isnot(None)
-            ).count()
-            
-            total = cadastrados + em_rota + finalizados_hoje + cancelados
-            
-            servicos_por_usuario.append({
-                'usuario': usuario_nome,
-                'cadastrados': cadastrados,
-                'em_rota': em_rota,
-                'finalizados_hoje': finalizados_hoje,
-                'cancelados': cancelados,
-                'total': total
-            })
-    
-    # Ordenar por total de serviços (decrescente)
-    servicos_por_usuario.sort(key=lambda x: x['total'], reverse=True)
-    
-    return render_template('dashboard.html',
-                           usuario_logado=usuario_logado,
-                           total_cadastrados=total_cadastrados,
-                           total_em_rota=total_em_rota,
-                           total_finalizados=total_finalizados,
-                           total_cancelados=total_cancelados,
-                           servicos_por_bairro=servicos_por_bairro,
-                           servicos_por_usuario=servicos_por_usuario)
 
+    servicos_por_bairro.sort(key=lambda x: x['total'], reverse=True)
+
+    # ===== Estatísticas por Usuário =====
+    usuarios_com_servicos = database.session.query(distinct(Usuario.usuario)).join(Servico).order_by(Usuario.usuario).all()
+
+    servicos_por_usuario = []
+    for (usuario_nome,) in usuarios_com_servicos:
+        usuario_obj = Usuario.query.filter_by(usuario=usuario_nome).first()
+        if not usuario_obj:
+            continue
+
+        cadastrados = Servico.query.filter(
+            Servico.id_usuario == usuario_obj.id,
+            Servico.status == 'Cadastrado',
+            Servico.data_criacao >= inicio_utc,
+            Servico.data_criacao <  fim_utc
+        ).count()
+
+        em_rota = Servico.query.filter(
+            Servico.id_usuario == usuario_obj.id,
+            Servico.status == 'Em Rota',
+            Servico.data_em_rota.isnot(None),
+            Servico.data_em_rota >= inicio_utc,
+            Servico.data_em_rota <  fim_utc
+        ).count()
+
+        finalizados_periodo = Servico.query.filter(
+            Servico.id_usuario == usuario_obj.id,
+            Servico.status == 'Finalizado',
+            Servico.data_finalizado.isnot(None),
+            Servico.data_finalizado >= inicio_utc,
+            Servico.data_finalizado <  fim_utc
+        ).count()
+
+        cancelados = Servico.query.filter(
+            Servico.id_usuario == usuario_obj.id,
+            Servico.status == 'Cancelado',
+            Servico.data_cancelado.isnot(None),
+            Servico.data_cancelado >= inicio_utc,
+            Servico.data_cancelado <  fim_utc
+        ).count()
+
+        total = cadastrados + em_rota + finalizados_periodo + cancelados
+        servicos_por_usuario.append({
+            'usuario': usuario_nome,
+            'cadastrados': cadastrados,
+            'em_rota': em_rota,
+            'finalizados_hoje': finalizados_periodo,
+            'cancelados': cancelados,
+            'total': total
+        })
+
+    servicos_por_usuario.sort(key=lambda x: x['total'], reverse=True)
+
+    # ===== Dados para o seletor de meses =====
+    meses_port = [
+        (1, "Janeiro"), (2, "Fevereiro"), (3, "Março"), (4, "Abril"),
+        (5, "Maio"), (6, "Junho"), (7, "Julho"), (8, "Agosto"),
+        (9, "Setembro"), (10, "Outubro"), (11, "Novembro"), (12, "Dezembro")
+    ]
+
+    return render_template(
+        'dashboard.html',
+        usuario_logado=usuario_logado,
+        total_cadastrados=total_cadastrados,
+        total_em_rota=total_em_rota,
+        total_finalizados=total_finalizados,
+        total_cancelados=total_cancelados,
+        servicos_por_bairro=servicos_por_bairro,
+        servicos_por_usuario=servicos_por_usuario,
+        label_finalizados=label_finalizados,
+        label_cancelados=label_cancelados,
+        periodo=periodo,
+        mes_sel=mes,
+        ano_sel=ano,
+        meses_port=meses_port
+    )
