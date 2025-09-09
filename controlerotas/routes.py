@@ -1101,6 +1101,33 @@ def _endereco_ok(s):
     )
 
 
+
+def _segmentar_rotas_navegacao(origin, stops, limite_waypoints=9, omitir_origin=False, navegar=False):
+    urls = []
+    i = 0
+    while i < len(stops):
+        bloco = stops[i:i + limite_waypoints]
+        destination = bloco[-1] if bloco else origin
+        waypoints = bloco[:-1]
+
+        base = 'https://www.google.com/maps/dir/?api=1&travelmode=driving'
+        url = base
+        if not omitir_origin:
+            url += f"&origin={quote(origin)}"
+        url += f"&destination={quote(destination)}"
+        if waypoints:
+            url += "&waypoints=" + quote('|'.join(waypoints), safe='|')
+        if navegar:
+            url += "&dir_action=navigate"  # no celular tenta já iniciar a navegação
+        urls.append(url)
+
+        origin = destination
+        i += limite_waypoints
+    return urls
+
+
+
+
 @app.route('/rota/google')
 def rota_google():
     # exige login (segue o padrão do seu app)
@@ -1137,15 +1164,20 @@ def rota_google():
         flash(f'Ignorados {len(ignorados)} serviço(s) sem endereço completo: {", ".join(map(str, ignorados))}.',
               'warning')
 
-    # Detecta se é mobile para limitar os waypoints (Maps mobile aceita menos)
+    # Detecta se é mobile para usar a localização atual e limitar waypoints
     ua = request.user_agent.string.lower()
     is_mobile = any(k in ua for k in ['android', 'iphone', 'ipad']) or (
                 'mobile' in ua and 'windows' not in ua and 'macintosh' not in ua)
-    limite = 3 if is_mobile else 9  # mobile ~3; desktop ~9
+    limite = 3 if is_mobile else 9  # celular ~3; desktop ~9
 
-
-    # gera 1..N links, respeitando limite de waypoints
-    urls = _segmentar_rotas(origin, paradas, limite_waypoints=limite)
+    # No celular: omite origin para o Maps usar o GPS do aparelho e já pedir navegação
+    urls = _segmentar_rotas_navegacao(
+        origin,  # ainda usamos para desktop e para encadear etapas
+        paradas,
+        limite_waypoints=limite,
+        omitir_origin=is_mobile,  # True no celular → usa “Sua localização”
+        navegar=is_mobile  # True no celular → tenta abrir já em Navegação
+    )
 
     # se coube num link só, redireciona direto
     if len(urls) == 1:
