@@ -1175,8 +1175,8 @@ def rota_google():
         origin,  # ainda usamos para desktop e para encadear etapas
         paradas,
         limite_waypoints=limite,
-        omitir_origin=is_mobile,  # True no celular → usa “Sua localização”
-        navegar=is_mobile  # True no celular → tenta abrir já em Navegação
+        omitir_origin=is_mobile,
+        navegar=False
     )
 
     # se coube num link só, redireciona direto
