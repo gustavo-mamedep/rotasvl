@@ -132,46 +132,35 @@
                     <div class="card-body position-relative">
 
 
-                        <div class="card-body position-relative">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title mb-0">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
+                            <div class="d-flex">
+                                <!-- Botões de reordenação - apenas para entregador e admin -->
+                                {% if usuario_logado.tipo in ['admin', 'entregador'] %}
+                                  <form action="{{ url_for('definir_ordem', id=servico.id) }}"
+                                        method="POST"
+                                        class="d-inline-flex align-items-center gap-1">
+                                    <input type="number"
+                                           name="nova_ordem"
+                                           min="1"
+                                           max="{{ em_rota|length }}"
+                                           value="{{ servico.ordem_rota or loop.index }}"
+                                           class="form-control form-control-sm text-center"
+                                           style="width: 40px;"
+                                           onchange="this.form.submit()">
+                                  </form>
+                                {% endif %}
 
-                          <!-- 🔝 Topo: posição (esq) + voltar (dir) -->
-                          <div class="row g-2 align-items-center mb-2">
-                            <div class="col-auto">
-                              {% if usuario_logado.tipo in ['admin', 'entregador'] %}
-                              <form action="{{ url_for('definir_ordem', id=servico.id) }}"
-                                    method="POST" class="d-inline-flex align-items-center">
-                                <input type="number"
-                                       name="nova_ordem"
-                                       min="1"
-                                       max="{{ em_rota|length }}"
-                                       value="{{ servico.ordem_rota or loop.index }}"
-                                       class="form-control form-control-sm text-center px-1"
-                                       style="width: 48px;"
-                                       aria-label="Posição na rota"
-                                       onchange="this.form.submit()">
-                              </form>
-                              {% endif %}
+                                <!-- Botão voltar para cadastrado - apenas para admin e operador (próprios serviços) -->
+                                {% if usuario_logado.tipo in ['admin', 'entregador'] or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
+                                <form action="{{ url_for('voltar_cadastrado', id=servico.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja voltar para CADASTRADO?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary p-1" title="Voltar para Cadastrado">
+                                        <i class="bi bi-arrow-return-left"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
                             </div>
-
-                            <div class="col text-end">
-                              {% if usuario_logado.tipo in ['admin', 'entregador'] or (usuario_logado.tipo == 'operador' and servico.id_usuario == usuario_logado.id) %}
-                              <form action="{{ url_for('voltar_cadastrado', id=servico.id) }}"
-                                    method="POST" class="d-inline"
-                                    onsubmit="return confirm('Deseja voltar para CADASTRADO?')">
-                                <button type="submit" class="btn btn-sm btn-outline-secondary py-1 px-2" title="Voltar para Cadastrado">
-                                  <i class="bi bi-arrow-return-left"></i>
-                                  <span class="d-none d-sm-inline"> Voltar</span>
-                                </button>
-                              </form>
-                              {% endif %}
-                            </div>
-                          </div>
-
-                          <!-- 🧾 Título abaixo do topo -->
-                          <h5 class="card-title mb-0">{{ servico.usuario.usuario }} - Bairro: {{ servico.bairro }}</h5>
-
-
-
+                        </div>
 
 
                         <p class="card-text mt-2">
