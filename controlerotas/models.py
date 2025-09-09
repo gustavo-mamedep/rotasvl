@@ -26,6 +26,14 @@ class Servico(database.Model):
     data_cancelado = database.Column(database.DateTime, nullable=True)
     ordem_rota = database.Column(database.Integer, nullable=True)
 
+    cep = database.Column(database.String, nullable=True)
+    rua = database.Column(database.String, nullable=True)
+    numero = database.Column(database.Integer, nullable=True)
+    bairro2 = database.Column(database.String, nullable=True)
+    cidade = database.Column(database.String, nullable=True)
+    estado = database.Column(database.String, nullable=True)
+    complemento = database.Column(database.String, nullable=True)
+
     id_usuario = database.Column(database.Integer, database.ForeignKey('usuario.id'), nullable=False)
     usuario = database.relationship('Usuario', backref='servicos')
 

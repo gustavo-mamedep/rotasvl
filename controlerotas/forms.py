@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField, TextAreaField
-from wtforms.validators import DataRequired, Length
+from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField, TextAreaField, IntegerField
+from wtforms.validators import DataRequired, Length, Optional
 
 
 class FormCriarUsuario(FlaskForm):
@@ -39,7 +39,15 @@ class FormCriarServico(FlaskForm):
     cartao = BooleanField('Maquina Cartão ?')
     valor = StringField('Valor', default='0,00')
     obs = TextAreaField('Observação')
+    cep = StringField('CEP', validators=[Optional(), Length(max=9)])
+    rua = StringField('Endereço',)
+    numero = IntegerField('Número', validators=[Optional()])
+    bairro2 = StringField('Bairro')
+    cidade = StringField('Cidade')
+    estado = StringField('Estado')
+    complemento = StringField('Complemento')
     botao_submit_servico = SubmitField('Criar Serviço')
+
 
 
 class FormBairros(FlaskForm):

@@ -78,6 +78,12 @@
                                 {% endif %}
                                 <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
+                            {% if servico.cep %}
+                                <hr>
+                                <strong>Endereço:</strong> {{ servico.rua }}, {{ servico.numero }}<br>
+                                <strong>Complemento:</strong> {{ servico.complemento or '---' }}<br>
+                            {% endif %}
+                            <hr>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                             {% if servico.cartao %}
                                 <span class="badge bg-danger mt-3"> LEVAR MAQUINA CARTÃO</span>
@@ -147,6 +153,12 @@
                                 {% endif %}
                                 <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
+                            {% if servico.cep %}
+                                <hr>
+                                <strong>Endereço:</strong> {{ servico.rua }}, {{ servico.numero }}<br>
+                                <strong>Complemento:</strong> {{ servico.complemento or '---' }}<br>
+                            {% endif %}
+                            <hr>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                             {% if servico.cartao %}
                                 <span class="badge bg-danger mt-3"> LEVAR MAQUINA CARTÃO</span>
@@ -191,6 +203,12 @@
                                 {% endif %}
                                 <br>
                             <strong>Valor taxa:</strong> R$ {{ "%.2f"|format(servico.valor) | replace('.', ',') }}<br>
+                            {% if servico.cep %}
+                                <hr>
+                                <strong>Endereço:</strong> {{ servico.rua }}, {{ servico.numero }}<br>
+                                <strong>Complemento:</strong> {{ servico.complemento or '---' }}<br>
+                            {% endif %}
+                            <hr>
                             <strong>Observação:</strong> {{ servico.obs or '---' }}<br>
                         </p>
                     </div>

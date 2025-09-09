@@ -1,158 +1,294 @@
 {% extends 'base.html' %}
-
 {% block body %}
 
-<div class="ms-5 mt-3">
-    <h1>{% if editar %}Editar Serviço{% else %}Criar Serviço{% endif %}</h1>
-</div>
+<div class="container py-5">
+  <!-- Form envolve o card e o botão abaixo -->
+  <form id="form-servico" method="POST" class="d-flex flex-column">
+    {{ form.csrf_token }}
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow p-4" style="width: 800px;">
-        <div class="mb-3">
-            <h2>{% if editar %}Editar os Dados:{% else %}Preencha os Dados:{% endif %}</h2>
+    <!-- Cartão com scroll interno -->
+    <div class="card shadow p-5 d-flex flex-column mx-auto" style="height: 70vh; max-width: 1000px;">
+      <!-- ÁREA ROLÁVEL (apenas os campos) -->
+      <div class="scroll-area">
+        <div class="row">
+          <!-- Coluna Esquerda -->
+          <div class="col-md-6">
+            <div class="ms-1 mb-3">
+              {{ form.bairro.label(class="form-label") }}
+              {{ form.bairro(class="form-select", id="bairro-select") }}
+            </div>
+
+            <div class="ms-1 mb-3">
+              {{ form.servico.label(class="form-label") }}
+              {{ form.servico(class="form-select") }}
+            </div>
+
+            <div class="ms-1 mb-3">
+              {{ form.documento.label(class="form-label") }}
+              {{ form.documento(class="form-control") }}
+            </div>
+
+            <div class="form-check ms-3 mb-3">
+              {{ form.taxa(class="form-check-input", id="taxa-checkbox") }}
+              {{ form.taxa.label(class="form-check-label") }}
+            </div>
+
+            <div class="form-check ms-3 mb-3">
+              {{ form.cartao(class="form-check-input", id="cartao-checkbox") }}
+              {{ form.cartao.label(class="form-check-label") }}
+            </div>
+          </div>
+
+          <!-- Coluna Direita -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              {{ form.prestador.label(class="form-label") }}
+              {{ form.prestador(class="form-select") }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.valor.label(class="form-label") }}
+              {{ form.valor(class="form-control", id="valor-input", readonly=true) }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.obs.label(class="form-label") }}
+              {{ form.obs(class="form-control", rows=4) }}
+            </div>
+
+            {% if editar %}
+            <div class="form-check mb-3">
+              <input type="checkbox" class="form-check-input" id="cancelar-checkbox" name="cancelar">
+              <label class="form-check-label text-danger" for="cancelar-checkbox">
+                <strong>Cancelar Serviço</strong>
+              </label>
+            </div>
+            {% endif %}
+          </div>
         </div>
 
-        <form method="POST">
-            {{ form.csrf_token }}
+        <!-- Endereço -->
+        <hr class="my-4">
+        <h5 class="mb-3">Endereço:</h5>
 
-            <div class="row">
-                <!-- Coluna Esquerda -->
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        {{ form.bairro.label(class="form-label") }}
-                        {{ form.bairro(class="form-select", id="bairro-select") }}
-                    </div>
+        <!-- Linha 1: CEP + Rua (rua maior) -->
+        <div class="row g-3">
+          <div class="ms-1 col-12 col-md-3">
+            {{ form.cep.label(class="form-label") }}
+            {{ form.cep(class="form-control", id="cep") }}
+          </div>
 
-                    <div class="mb-3">
-                        {{ form.servico.label(class="form-label") }}
-                        {{ form.servico(class="form-select") }}
-                    </div>
+          <div class="ms-1 col-12 col-md-9">
+            {{ form.rua.label(class="form-label") }}
+            {{ form.rua(class="form-control bg-light", id="rua", readonly=True, aria_readonly="true") }}
+          </div>
 
-                    <div class="mb-3">
-                        {{ form.documento.label(class="form-label") }}
-                        {{ form.documento(class="form-control") }}
-                    </div>
+          <div class="col-12 col-md-2">
+            {{ form.numero.label(class="form-label") }}
+            {{ form.numero(class="form-control", id="numero", inputmode="numeric", pattern="\\d*") }}
+          </div>
 
-                    <div class="form-check mb-3">
-                        {{ form.taxa(class="form-check-input", id="taxa-checkbox") }}
-                        {{ form.taxa.label(class="form-check-label") }}
-                    </div>
+          <div class="ms-1 col-12 col-md-11">
+            {{ form.complemento.label(class="form-label") }}
+            {{ form.complemento(class="form-control", id="complemento") }}
+          </div>
+        </div>
 
-                    <div class="form-check mb-3">
-                        {{ form.cartao(class="form-check-input", id="cartao-checkbox") }}
-                        {{ form.cartao.label(class="form-check-label") }}
-                    </div>
+        <!-- Linha 2: Cidade + Estado -->
+        <div class="row g-3 mt-0">
+          <div class="ms-1 col-6 col-md-3">
+            {{ form.bairro2.label(class="form-label") }}
+            {{ form.bairro2(class="form-control bg-light", id="bairro2", readonly=True, aria_readonly="true") }}
+          </div>
+          <div class="col-12 col-md-3">
+            {{ form.cidade.label(class="form-label") }}
+            {{ form.cidade(class="form-control bg-light", id="cidade", readonly=True, aria_readonly="true") }}
+          </div>
+          <div class="col-6 col-md-3">
+            {{ form.estado.label(class="form-label") }}
+            {{ form.estado(class="form-control bg-light", id="estado", readonly=True, aria_readonly="true") }}
+          </div>
+        </div>
+      </div><!-- /scroll-area -->
+    </div><!-- /card -->
 
-                </div>
-
-                <!-- Coluna Direita -->
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        {{ form.prestador.label(class="form-label") }}
-                        {{ form.prestador(class="form-select") }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form.valor.label(class="form-label") }}
-                        {{ form.valor(class="form-control", id="valor-input", readonly=true) }}
-                    </div>
-
-                    <div class="mb-3">
-                        {{ form.obs.label(class="form-label") }}
-                        {{ form.obs(class="form-control", rows=4) }}
-                    </div>
-                    
-                    {% if editar %}
-                    <div class="form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="cancelar-checkbox" name="cancelar">
-                        <label class="form-check-label text-danger" for="cancelar-checkbox">
-                            <strong>Cancelar Serviço</strong>
-                        </label>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-login" id="submit-button">
-                    {% if editar %}Atualizar Serviço{% else %}Criar Serviço{% endif %}
-                </button>
-            </div>
-        </form>
+    <!-- Botão abaixo do cartão (fora do scroll) -->
+    <div class="d-grid col-12 col-sm-8 col-md-6 mx-auto mt-4">
+      <button type="submit" class="btn btn-login" id="submit-button">
+        {% if editar %}Atualizar Serviço{% else %}Criar Serviço{% endif %}
+      </button>
     </div>
+  </form>
 </div>
+
+<style>
+  /* Área rolável dentro do card (flex) */
+  .scroll-area{
+    flex: 1 1 auto;
+    min-height: 0;       /* essencial para aparecer o scroll em flex */
+    overflow-y: auto;    /* scroll vertical */
+    overflow-x: hidden;  /* evita barra horizontal */
+    padding-right: .25rem;
+  }
+  .card { overflow: hidden; }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const bairroSelect = document.getElementById('bairro-select');
-    const taxaCheckbox = document.getElementById('taxa-checkbox');
-    const valorInput = document.getElementById('valor-input');
-    
-    // Função para formatar valor com duas casas decimais
-    function formatarValor(valor) {
-        // Converter para número e depois formatar com 2 casas decimais
-        const numero = parseFloat(valor.replace(',', '.'));
-        if (isNaN(numero)) {
-            return '0,00';
-        }
-        return numero.toFixed(2).replace('.', ',');
+  const bairroSelect = document.getElementById('bairro-select');
+  const taxaCheckbox = document.getElementById('taxa-checkbox');
+  const valorInput = document.getElementById('valor-input');
+
+  function formatarValor(valor) {
+    const numero = parseFloat((valor || '').toString().replace(',', '.'));
+    if (isNaN(numero)) return '0,00';
+    return numero.toFixed(2).replace('.', ',');
+  }
+
+  function atualizarValor() {
+    const bairroSelecionado = bairroSelect ? bairroSelect.value : '';
+    const taxaMarcada = taxaCheckbox ? taxaCheckbox.checked : false;
+
+    if (taxaMarcada && bairroSelecionado) {
+      fetch(`/api/bairro/valor/${encodeURIComponent(bairroSelecionado)}`)
+        .then(r => r.json())
+        .then(data => { if (valorInput) valorInput.value = formatarValor(data.valor || '0,00'); })
+        .catch(() => { if (valorInput) valorInput.value = '0,00'; });
+    } else {
+      if (valorInput) valorInput.value = '0,00';
     }
-    
-    // Função para atualizar o valor baseado na taxa
-    function atualizarValor() {
-        const bairroSelecionado = bairroSelect.value;
-        const taxaMarcada = taxaCheckbox.checked;
-        
-        if (taxaMarcada && bairroSelecionado && bairroSelecionado !== '') {
-            // Se taxa marcada e bairro selecionado, buscar valor do bairro
-            fetch(`/api/bairro/valor/${encodeURIComponent(bairroSelecionado)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const valorFormatado = formatarValor(data.valor || '0,00');
-                    valorInput.value = valorFormatado;
-                })
-                .catch(error => {
-                    console.error('Erro ao buscar valor do bairro:', error);
-                    valorInput.value = '0,00';
-                });
-        } else {
-            // Se taxa desmarcada ou nenhum bairro selecionado, valor = 0,00
-            valorInput.value = '0,00';
+  }
+
+  if (taxaCheckbox) taxaCheckbox.addEventListener('change', atualizarValor);
+  if (bairroSelect) bairroSelect.addEventListener('change', function() {
+    if (taxaCheckbox && taxaCheckbox.checked) atualizarValor();
+  });
+
+  const cancelarCheckbox = document.getElementById('cancelar-checkbox');
+  const submitButton = document.getElementById('submit-button');
+  if (cancelarCheckbox && submitButton) {
+    cancelarCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        submitButton.textContent = 'Cancelar Serviço';
+        submitButton.className = 'btn btn-danger';
+        if (!confirm('Tem certeza que deseja cancelar este serviço? Esta ação não pode ser desfeita.')) {
+          this.checked = false;
+          submitButton.textContent = '{% if editar %}Atualizar Serviço{% else %}Criar Serviço{% endif %}';
+          submitButton.className = 'btn btn-login';
         }
-    }
-    
-    // Event listeners
-    taxaCheckbox.addEventListener('change', atualizarValor);
-    bairroSelect.addEventListener('change', function() {
-        // Se taxa já estiver marcada, atualizar valor
-        if (taxaCheckbox.checked) {
-            atualizarValor();
-        }
+      } else {
+        submitButton.textContent = '{% if editar %}Atualizar Serviço{% else %}Criar Serviço{% endif %}';
+        submitButton.className = 'btn btn-login';
+      }
     });
-    
-    // Controle do checkbox de cancelamento (apenas em modo edição)
-    const cancelarCheckbox = document.getElementById('cancelar-checkbox');
-    const submitButton = document.getElementById('submit-button');
-    
-    if (cancelarCheckbox && submitButton) {
-        cancelarCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                submitButton.textContent = 'Cancelar Serviço';
-                submitButton.className = 'btn btn-danger';
-                // Confirmar ação
-                if (!confirm('Tem certeza que deseja cancelar este serviço? Esta ação não pode ser desfeita.')) {
-                    this.checked = false;
-                    submitButton.textContent = 'Atualizar Serviço';
-                    submitButton.className = 'btn btn-login';
-                }
-            } else {
-                submitButton.textContent = 'Atualizar Serviço';
-                submitButton.className = 'btn btn-login';
-            }
-        });
-    }
+  }
+
+  // Máscara de CEP
+  const cepInput = document.getElementById('cep');
+  if (cepInput) {
+    cepInput.addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
+      e.target.value = v;
+    });
+  }
+
+  // Apenas dígitos no número
+  const numeroInput = document.getElementById('numero');
+  if (numeroInput) {
+    numeroInput.addEventListener('input', function (e) {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 7);
+    });
+  }
 });
+
+// --- CEP -> auto-preencher rua/cidade/estado --- //
+const cepInput    = document.getElementById('cep');
+const ruaInput    = document.getElementById('rua');
+const cidadeInput = document.getElementById('cidade');
+const estadoInput = document.getElementById('estado');
+const bairro2Input = document.getElementById('bairro2');
+
+
+function onlyDigits(s){ return (s || '').replace(/\D/g, ''); }
+function clearEndereco(){
+  if (ruaInput) ruaInput.value = '';
+  if (cidadeInput) cidadeInput.value = '';
+  if (estadoInput) estadoInput.value = '';
+  if (bairro2Input) bairro2Input.value = '';
+}
+
+
+async function buscaViaCEP(cep8){
+  const r = await fetch(`https://viacep.com.br/ws/${cep8}/json/`);
+  if (!r.ok) throw new Error('HTTP ViaCEP');
+  const j = await r.json();
+  if (j.erro) throw new Error('CEP não encontrado (ViaCEP)');
+  return {
+    rua: j.logradouro || '',
+    cidade: j.localidade || '',
+    estado: j.uf || '',
+    bairro: j.bairro || ''
+  };
+}
+
+
+async function buscaBrasilAPI(cep8){
+  const r = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep8}`);
+  if (!r.ok) throw new Error('HTTP BrasilAPI');
+  const j = await r.json();
+  if (j.errors) throw new Error('CEP não encontrado (BrasilAPI)');
+  return {
+    rua: j.street || '',
+    cidade: j.city || '',
+    estado: j.state || '',
+    bairro: j.neighborhood || ''
+  };
+}
+
+
+async function preencherPorCEP(cepStr){
+  const cep8 = (cepStr || '').replace(/\D/g, '');
+  if (cep8.length !== 8) { clearEndereco(); return; }
+
+  if (cepInput) cepInput.classList.remove('is-invalid','is-valid');
+
+  try {
+    let data;
+    try {
+      data = await buscaViaCEP(cep8);
+    } catch {
+      data = await buscaBrasilAPI(cep8); // fallback
+    }
+
+    if (ruaInput)     ruaInput.value     = data.rua;
+    if (cidadeInput)  cidadeInput.value  = data.cidade;
+    if (estadoInput)  estadoInput.value  = data.estado;
+    if (bairro2Input) bairro2Input.value = data.bairro;
+
+    if (cepInput) cepInput.classList.add('is-valid');
+  } catch (err) {
+    clearEndereco();
+    if (cepInput) cepInput.classList.add('is-invalid');
+  }
+}
+
+// dispara ao sair do campo ou quando completar 8 dígitos
+if (cepInput) {
+  // máscara simples (se ainda não tiver)
+  cepInput.addEventListener('input', function (e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0,8);
+    if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+    e.target.value = v;
+
+    if (onlyDigits(v).length === 8) preencherPorCEP(v);
+  });
+
+  cepInput.addEventListener('blur', function(e){
+    preencherPorCEP(e.target.value);
+  });
+}
+
 </script>
 
 {% endblock %}
-

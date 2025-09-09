@@ -323,6 +323,13 @@ def criar_servico():
             cartao=form.cartao.data,
             valor=valor,
             obs=form.obs.data if form.obs.data else '',
+            cep=form.cep.data,
+            rua=form.rua.data,
+            numero=form.numero.data,
+            bairro2=form.bairro2.data,
+            cidade=form.cidade.data,
+            estado=form.estado.data,
+            complemento=form.complemento.data,
             id_usuario=session['usuario_logado']  # Usando diretamente o id do usuário logado
         )
         database.session.add(servico)
@@ -462,6 +469,13 @@ def editar_servico(id):
             servico.cartao = form.cartao.data
             servico.valor = float(form.valor.data.replace(',', '.')) if form.valor.data else 0.0
             servico.obs = form.obs.data if form.obs.data else ''
+            servico.cep = form.cep.data
+            servico.rua = form.rua.data
+            servico.numero = form.numero.data
+            servico.bairro2 = form.bairro2.data
+            servico.cidade = form.cidade.data
+            servico.estado = form.estado.data
+            servico.complemento = form.complemento.data
 
             database.session.commit()
             flash('Serviço atualizado com sucesso!', 'success')
@@ -476,6 +490,14 @@ def editar_servico(id):
     form.cartao.data = servico.cartao
     form.valor.data = f"{servico.valor:.2f}".replace(".", ",")
     form.obs.data = servico.obs
+    form.cep.data = servico.cep
+    form.rua.data = servico.rua
+    form.numero.data = servico.numero
+    form.bairro2.data = servico.bairro2
+    form.cidade.data = servico.cidade
+    form.estado.data = servico.estado
+    form.complemento.data = servico.complemento
+
 
     return render_template("criar_servico.html", form=form, usuario_logado=usuario_logado, servico=servico, editar=True)
 
