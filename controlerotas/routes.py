@@ -608,6 +608,65 @@ def mover_ordem_rota(id, direcao):
     return redirect(url_for('home'))
 
 
+@app.route('/servico/definir_ordem/<int:id>', methods=['POST'])
+def definir_ordem(id):
+    """Define explicitamente a posição (ordem_rota) de um serviço 'Em Rota'."""
+    if 'usuario_logado' not in session:
+        return redirect(url_for('login'))
+
+    # Apenas admin e entregador podem reordenar (mesma regra das setas)
+    if verificar_permissao_operador():
+        flash('Acesso negado. Operadores não podem reordenar serviços.', 'danger')
+        return redirect(url_for('home'))
+
+    servico = Servico.query.get_or_404(id)
+
+    if servico.status != 'Em Rota':
+        flash('Só é possível reordenar serviços que estão "Em Rota".', 'danger')
+        return redirect(url_for('home'))
+
+    # Lê o número vindo do input
+    try:
+        nova_ordem = int(request.form.get('nova_ordem', '0'))
+    except:
+        nova_ordem = 0
+
+    # Carrega todos os "Em Rota" e garante uma numeração contínua 1..N
+    itens = (Servico.query
+             .filter_by(status='Em Rota')
+             .order_by(Servico.ordem_rota.asc(), Servico.id.asc())
+             .all())
+    if not itens:
+        return redirect(url_for('home'))
+
+    for idx, s in enumerate(itens, start=1):
+        s.ordem_rota = idx
+    database.session.flush()
+
+    total = len(itens)
+    pos_atual = servico.ordem_rota or total
+
+    # Limita a nova posição ao intervalo válido
+    if nova_ordem < 1:
+        nova_ordem = 1
+    if nova_ordem > total:
+        nova_ordem = total
+
+    # Se mudou de posição, faz um "swap" com quem estiver ocupando a nova posição
+    if nova_ordem != pos_atual:
+        vizinho = (Servico.query
+                   .filter(Servico.status == 'Em Rota',
+                           Servico.ordem_rota == nova_ordem,
+                           Servico.id != servico.id)
+                   .first())
+        if vizinho:
+            vizinho.ordem_rota = pos_atual
+
+        servico.ordem_rota = nova_ordem
+
+    database.session.commit()
+    return redirect(url_for('home'))
+
 
 # ======================= CANCELADOS ============================
 
