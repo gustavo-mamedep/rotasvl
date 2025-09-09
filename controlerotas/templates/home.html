@@ -3,18 +3,31 @@
 {% block body %}
 <div class="container-fluid mt-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0 ms-1">Rota dos Serviços</h1>
-        {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'operador' %}
-        <a href="{{ url_for('rota_google') }}" class="btn btn-primary" target="_blank" rel="noopener">
-          <i class="bi bi-geo-alt"></i> Montar Rota
-        </a>
+        <div class="row align-items-center mb-3 g-2">
+          <div class="col-12 col-sm">
+            <h1 class="mb-0 ms-1 fs-4 fs-sm-2 text-truncate">Rota dos Serviços</h1>
+          </div>
 
-        <a href="{{ url_for('criar_servico') }}" class="btn btn-login">
-            + Novo Serviço
-        </a>
-        {% endif %}
-    </div>
+          {% if usuario_logado.tipo == 'admin' or usuario_logado.tipo == 'operador' %}
+          <div class="col-12 col-sm-auto">
+            <div class="d-flex flex-wrap gap-2 justify-content-sm-end">
+              <a href="{{ url_for('rota_google') }}"
+                 class="btn btn-primary btn-sm w-100 w-sm-auto px-2"
+                 target="_blank" rel="noopener">
+                <i class="bi bi-geo-alt"></i>
+                <span class="d-none d-sm-inline"> Montar Rota</span>
+              </a>
+
+              <a href="{{ url_for('criar_servico') }}"
+                 class="btn btn-login btn-sm w-100 w-sm-auto px-2">
+                <span class="d-none d-sm-inline">+ Novo Serviço</span>
+                <span class="d-inline d-sm-none">+ Novo</span>
+              </a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
 
     <!-- Seção de Filtros -->
     <div class="card mb-4 shadow-sm">
