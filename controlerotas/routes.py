@@ -7,6 +7,7 @@ from sqlalchemy import distinct, or_
 from datetime import timedelta
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from urllib.parse import quote
 
 
 def obter_usuario_logado():
@@ -549,6 +550,9 @@ def obter_valor_bairro(nome_bairro):
 
 
 
+
+
+
 # ======================= REORDENAÇÃO EM ROTA ============================
 
 @app.route('/servico/mover_ordem/<int:id>/<string:direcao>', methods=['POST'])
@@ -694,7 +698,7 @@ def cancelar_servico(id):
 
 
 
-# ======================= DASHBOARD ============================
+
 # ======================= DASHBOARD ============================
 @app.route('/dashboard')
 def dashboard():
@@ -1047,3 +1051,106 @@ def dashboard():
         usuarios_opts=usuarios_opts,   # novo
         usuario_id=usuario_id          # novo (para manter "selected" no HTML)
     )
+
+
+# ======================= GOOGLE ============================
+def _endereco_completo(servico):
+    """Monta o endereço completo a partir dos campos do serviço."""
+    partes = [
+        (servico.rua or '').strip(),
+        (str(servico.numero) if servico.numero is not None else '').strip(),
+        (servico.bairro2 or '').strip(),
+        (servico.cidade or '').strip(),
+        (servico.estado or '').strip(),
+        'Brasil'
+    ]
+    # tira vazios e junta com vírgula
+    return ', '.join([p for p in partes if p])
+
+def _segmentar_rotas(origin, stops, limite_waypoints=9):
+    """
+    O Google Maps URL aceita até 9 'waypoints' por link (no desktop).
+    Divide automaticamente em 1..N links se passar do limite.
+    """
+    urls = []
+    i = 0
+    while i < len(stops):
+        bloco = stops[i:i + limite_waypoints]
+        destination = bloco[-1] if bloco else origin
+        waypoints = bloco[:-1]
+
+        base = 'https://www.google.com/maps/dir/?api=1&travelmode=driving'
+        url = f"{base}&origin={quote(origin)}&destination={quote(destination)}"
+        if waypoints:
+            url += "&waypoints=" + quote('|'.join(waypoints), safe='|')
+
+        urls.append(url)
+        # próxima perna começa onde esta terminou
+        origin = destination
+        i += limite_waypoints
+    return urls
+
+
+def _endereco_ok(s):
+    """Regras mínimas para considerar o endereço válido."""
+    return bool(
+        (s.rua or '').strip() and
+        (s.numero is not None) and
+        (s.cidade or '').strip() and
+        (s.estado or '').strip()
+    )
+
+
+@app.route('/rota/google')
+def rota_google():
+    # exige login (segue o padrão do seu app)
+    if 'usuario_logado' not in session:
+        return redirect(url_for('login'))
+
+    # origem: endereço da sua base/loja/depósito
+    origin = app.config.get('ORIGEM_ROTA')
+    if not origin:
+        flash('Defina ORIGEM_ROTA na configuração do aplicativo (endereço de saída).', 'warning')
+        return redirect(url_for('home'))
+
+    # busca serviços com status "Em Rota" ordenando por ordem_rota (e um desempate por id)
+    servicos = (Servico.query
+                .filter(Servico.status == 'Em Rota',
+                        Servico.prestador == 'Motoqueiro')
+                .order_by(Servico.ordem_rota.asc(), Servico.id.asc())
+                .all())
+
+    # monta lista de paradas a partir dos endereços válidos
+    paradas = []
+    ignorados = []  # ids de serviços sem endereço completo
+    for s in servicos:
+        if _endereco_ok(s):
+            paradas.append(_endereco_completo(s))
+        else:
+            ignorados.append(s.id)
+
+    if not paradas:
+        flash('Não há serviços "Em Rota" com endereço completo.', 'warning')
+        return redirect(url_for('home'))
+
+    if ignorados:
+        flash(f'Ignorados {len(ignorados)} serviço(s) sem endereço completo: {", ".join(map(str, ignorados))}.',
+              'warning')
+
+    # Detecta se é mobile para limitar os waypoints (Maps mobile aceita menos)
+    ua = request.user_agent.string.lower()
+    is_mobile = any(k in ua for k in ['android', 'iphone', 'ipad']) or (
+                'mobile' in ua and 'windows' not in ua and 'macintosh' not in ua)
+    limite = 3 if is_mobile else 9  # mobile ~3; desktop ~9
+
+
+    # gera 1..N links, respeitando limite de waypoints
+    urls = _segmentar_rotas(origin, paradas, limite_waypoints=limite)
+
+    # se coube num link só, redireciona direto
+    if len(urls) == 1:
+        return redirect(urls[0])
+
+    # senão, mostra uma página com os links sequenciais
+    return render_template('rotas_google.html', urls=urls)
+

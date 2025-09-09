@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container mt-4">
+  <h3>Rota dividida em etapas</h3>
+  <p>O Google Maps limita a quantidade de paradas por link. Clique na etapa 1 e, ao concluir no Maps, abra a próxima etapa:</p>
+  <ol>
+    {% for u in urls %}
+      <li><a href="{{ u }}" target="_blank" rel="noopener">Abrir etapa {{ loop.index }} no Google Maps</a></li>
+    {% endfor %}
+  </ol>
+  <a class="btn btn-secondary" href="{{ url_for('home') }}">Voltar</a>
+</div>
+{% endblock %}
