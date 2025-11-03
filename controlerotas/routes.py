@@ -3,7 +3,7 @@ from controlerotas import database, app
 from controlerotas.models import Usuario, Bairros, Servico
 from controlerotas.forms import FormCriarUsuario, FormBairros, FormCriarServico, FormFiltros
 from sqlalchemy.orm import joinedload
-from sqlalchemy import distinct, or_
+from sqlalchemy import distinct, or_, func
 from datetime import timedelta
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -811,6 +811,8 @@ def dashboard():
     inicio_utc = inicio_local.astimezone(tz_utc)
     fim_utc    = inicio_prox_mes_local.astimezone(tz_utc)
 
+
+
     # Helper para aplicar filtro de usuário (se houver)
     def apply_user(query):
         if usuario_id:
@@ -920,6 +922,36 @@ def dashboard():
         )
     ).count()
 
+    valor_entrada_taxas = apply_user(
+        Servico.query.filter(
+            Servico.status != 'Cancelado',
+            Servico.data_finalizado.isnot(None),
+            Servico.data_finalizado >= inicio_utc,
+            Servico.data_finalizado < fim_utc
+        ).with_entities(func.sum(Servico.valor))
+    ).scalar() or 0.0
+
+    valor_uber = apply_user(
+        Servico.query.filter(
+            Servico.prestador == 'Uber',
+            Servico.status != 'Cancelado',
+            Servico.data_finalizado.isnot(None),
+            Servico.data_finalizado >= inicio_utc,
+            Servico.data_finalizado < fim_utc
+        ).with_entities(func.sum(Servico.valor))
+    ).scalar() or 0.0
+
+    valor_outros = apply_user(
+        Servico.query.filter(
+            Servico.prestador == 'Outros',
+            Servico.status != 'Cancelado',
+            Servico.data_finalizado.isnot(None),
+            Servico.data_finalizado >= inicio_utc,
+            Servico.data_finalizado < fim_utc
+        ).with_entities(func.sum(Servico.valor))
+    ).scalar() or 0.0
+
+
     # ===== Estatísticas por Bairro (com filtro de usuário) =====
     bairros_com_servicos = database.session.query(distinct(Servico.bairro)).filter(
         Servico.bairro.isnot(None)
@@ -931,6 +963,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Venda',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -941,6 +974,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Condicional',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -951,6 +985,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Buscar_cond',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -961,6 +996,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Troca',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -971,6 +1007,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Recebimento',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -981,6 +1018,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico == 'Transferencia',
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -991,6 +1029,7 @@ def dashboard():
             Servico.query.filter(
                 Servico.bairro == bairro,
                 Servico.servico.in_(['Mercado Livre', 'Correios', 'Outros']),
+                Servico.status != 'Cancelado',
                 Servico.data_finalizado.isnot(None),
                 Servico.data_finalizado >= inicio_utc,
                 Servico.data_finalizado < fim_utc
@@ -1099,6 +1138,9 @@ def dashboard():
         total_recebimento=total_recebimento,
         total_transferencia=total_transferencia,
         total_outros=total_outros,
+        valor_entrada_taxas=valor_entrada_taxas,
+        valor_uber=valor_uber,
+        valor_outros=valor_outros,
         servicos_por_bairro=servicos_por_bairro,
         servicos_por_usuario=servicos_por_usuario,
         label_finalizados=label_finalizados,

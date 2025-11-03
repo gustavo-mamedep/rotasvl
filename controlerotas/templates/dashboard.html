@@ -177,6 +177,39 @@
     </div>
   </div>
 
+
+  <!-- Cartão Valor Loja -->
+  <div class="row mt-4">
+      <div class="col-md-4 mb-4">
+          <div class="card border-success h-100">
+              <div class="card-body text-center">
+                  <h5 class="card-title text-success mt-2">💰 Valor Entrada de Taxas</h5>
+                  <h3 class="text-success">R$ {{ "%.2f"|format(valor_entrada_taxas) }}</h3>
+                  <small class="text-muted">Todas as taxas lançadas</small>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+          <div class="card border-danger h-100">
+              <div class="card-body text-center">
+                  <h5 class="card-title text-danger mt-2">💸 Valor Taxas Uber</h5>
+                  <h3 class="text-danger">R$ {{ "%.2f"|format(valor_uber) }}</h3>
+                  <small class="text-danger">Valor lançado no sistema</small>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4 mb-4">
+          <div class="card border-warning h-100">
+              <div class="card-body text-center">
+                  <h5 class="card-title text-warning mt-2">🏍️ Valor Taxas Outros</h5>
+                  <h3 class="text-warning">R$ {{ "%.2f"|format(valor_outros) }}</h3>
+                  <small class="text-warning">Valor lançado no sistema</small>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
   <!-- Estatísticas por Bairro (AGORA CONDICIONAIS POR TIPO) -->
   <div class="row mt-4">
     <div class="col-12">
