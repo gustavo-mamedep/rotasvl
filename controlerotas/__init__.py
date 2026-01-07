@@ -13,9 +13,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     or os.getenv('SQLALCHEMY_DATABASE_URI')
     or 'postgresql://rotas_user:MAMEDE3276@localhost:5432/rotas_db'
 )
-
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
 
 database = SQLAlchemy(app)
 
