@@ -22,10 +22,10 @@ services:
       FLASK_ENV: production
       TZ: America/Sao_Paulo
     ports:
-      - "8001:8001"
+      - "8000:8000"
     command: >
       gunicorn
-      --bind 0.0.0.0:8001
+      --bind 0.0.0.0:8000
       --workers 3
       main:app
 

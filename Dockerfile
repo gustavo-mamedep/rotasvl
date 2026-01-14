@@ -23,8 +23,8 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 # Porta usada pelo Gunicorn
-EXPOSE 8001
+EXPOSE 8000
 
 # Comando padrão (pode ser sobrescrito pelo compose)
-CMD ["gunicorn", "--bind", "0.0.0.0:8001", "--workers", "3", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "main:app"]
 
